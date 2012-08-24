@@ -3,7 +3,6 @@ package com.sfeir.githubTrello;
 import java.io.IOException;
 import java.util.Collection;
 
-import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import static com.google.common.collect.Lists.*;
@@ -22,10 +21,6 @@ public class Json {
 	}
 
 	public static class JsonToType {
-		private ObjectMapper mapper;
-
-		private String[] jsons;
-
 		public JsonToType(String... jsons) {
 			this.jsons = jsons;
 			this.mapper = new ObjectMapper();
@@ -40,14 +35,15 @@ public class Json {
 					return collection;
 				}
 			}
-			catch (JsonProcessingException e) {
-				e.printStackTrace();
-			}
 			catch (IOException e) {
 				e.printStackTrace();
-			}// TODO: move catch higher up?
+			}
 			return emptyList();
 		}
+
+		private ObjectMapper mapper;
+
+		private String[] jsons;
 	}
 
 	public static TypeToJson fromType(Object object) {
@@ -56,8 +52,6 @@ public class Json {
 
 
 	public static class TypeToJson {
-		private Object objects;
-
 		public TypeToJson(Object objects) {
 			this.objects = objects;
 			this.mapper = new ObjectMapper();
@@ -68,17 +62,13 @@ public class Json {
 			try {
 				return mapper.writeValueAsString(objects);
 			}
-			catch (JsonProcessingException e) {
-				//				logger.error(e, e);
-				e.printStackTrace();
-			}
 			catch (IOException e) {
-				//				logger.error(e, e);
-				e.printStackTrace();
+				e.printStackTrace();//TODO:Logger
 			}
 			return "";
 		}
 
+		private Object objects;
 		private ObjectMapper mapper;
 	}
 }

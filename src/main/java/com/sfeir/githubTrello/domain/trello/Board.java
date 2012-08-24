@@ -7,7 +7,7 @@ public class Board {
 		this.boardId = boardId;
 	}
 
-	public String getBoardId() {
+	public String getId() {
 		return boardId;
 	}
 

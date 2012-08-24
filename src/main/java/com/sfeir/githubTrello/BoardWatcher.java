@@ -28,31 +28,25 @@ public class BoardWatcher {
 	private List oldEndList;
 	private List newEndList;
 
-	public static Builder boardWatcherBuilder() {//NOTE: Template
-		BoardWatcher.Builder builder = new BoardWatcher.Builder();
-		return builder;
-	}
-
 	private static <T> Collection<T> difference(Collection<T> left, Collection<T> right)
 	{
 		Collection<T> result = newArrayList(left);
-		result.removeAll(newArrayList(right));
+		result.removeAll(right);
 		return result;
 	}
 
 	private static <T> Collection<T> intersection(Collection<T> left, Collection<T> right)
 	{
 		Collection<T> result = newArrayList(left);
-		result.retainAll(newArrayList(right));
+		result.retainAll(right);
 		return result;
 	}
 
-	public static class Builder {
-		private List oldStartList;
-		private List newStartList;
-		private List oldEndList;
-		private List newEndList;
+	public static Builder boardWatcherBuilder() {
+		return new BoardWatcher.Builder();
+	}
 
+	public static class Builder {
 		public Builder oldStartList(List oldStartList) {
 			this.oldStartList = oldStartList;
 			return this;
@@ -73,7 +67,6 @@ public class BoardWatcher {
 			return this;
 		}
 
-
 		public BoardWatcher build() {
 			BoardWatcher boardWatcher = new BoardWatcher();
 			boardWatcher.oldStartList = oldStartList;
@@ -82,5 +75,10 @@ public class BoardWatcher {
 			boardWatcher.newEndList = newEndList;
 			return boardWatcher;
 		}
+
+		private List oldStartList;
+		private List newStartList;
+		private List oldEndList;
+		private List newEndList;
 	}
 }

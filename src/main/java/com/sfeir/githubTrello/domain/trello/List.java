@@ -7,7 +7,7 @@ import static java.util.Collections.*;
 import static org.apache.commons.lang3.StringUtils.*;
 
 /**
- * A list in the Trello sense: ordered cards
+ * A list in the Trello sense, a column of cards
  * @author Mr.MEDDAH
  *
  */

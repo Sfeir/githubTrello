@@ -21,7 +21,7 @@ public class TrelloService {
 	}
 
 	public String getListId(Board board, String listName) {
-		String listInJson = get(format("/boards/%s/lists", board.getBoardId()));
+		String listInJson = get(format("/boards/%s/lists", board.getId()));
 		for (List list : fromJson(listInJson).to(List.class))
 			if (listName.equals(list.getName()))
 				return list.getId();
@@ -40,7 +40,7 @@ public class TrelloService {
 
 	private final String token;
 
-	// TODO: For the moment...
+	// TODO: Hardcoded api key
 	private static String apiKey = "d0e4aa36488c2e5957da7c3a61a76ff2";
 	private static String apiUrl = "https://api.trello.com/1";
 

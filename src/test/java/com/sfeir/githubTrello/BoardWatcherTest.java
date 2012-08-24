@@ -7,7 +7,6 @@ import org.junit.Test;
 import com.sfeir.githubTrello.domain.trello.Card;
 import com.sfeir.githubTrello.domain.trello.List;
 
-import static com.google.common.collect.Collections2.*;
 import static com.sfeir.githubTrello.BoardWatcher.*;
 import static com.sfeir.githubTrello.Json.*;
 import static com.sfeir.githubTrello.domain.trello.Card.*;
@@ -17,19 +16,32 @@ import static org.fest.assertions.Assertions.*;
 
 public class BoardWatcherTest {
 
-	@Test
-	public void should_detect_that_one_card_was_moved() {
 
+	@Test
+	public void should_detect_that_two_cards_were_moved_between_watched_lists() {
 		BoardWatcher boardWatcher = boardWatcherBuilder()
-				.oldStartList(list("l01", card("c01"), card("c02")))
-				.oldEndList(list("l02", card("c03")))
+				.oldStartList(list("l01", card("c01"), card("c02"), card("c03")))
 				.newStartList(list("l01", card("c01")))
-				.newEndList(list("l02", card("c02"), card("c03")))
+				.oldEndList(list("l02", card("c04")))
+				.newEndList(list("l02", card("c02"), card("c03"), card("c04")))
 				.build();
 
 		Collection<String> movedCards = boardWatcher.getMovedCards();
+		assertThat(movedCards).containsOnly("c02", "c03");
+	}
 
-		assertThat(movedCards).containsOnly("c02");
+
+	@Test
+	public void should_detect_that_no_card_was_moved_between_watched_lists() {
+		BoardWatcher boardWatcher = boardWatcherBuilder()
+				.oldStartList(list("l01", card("c01")))
+				.newStartList(list("l01", card("c01"), card("c03")))
+				.oldEndList(list("l02", card("c02"), card("c04")))
+				.newEndList(list("l02", card("c02")))
+				.build();
+
+		Collection<String> movedCards = boardWatcher.getMovedCards();
+		assertThat(movedCards).isEmpty();
 	}
 
 	private static List list(String listId, Card... cards) {
@@ -42,20 +54,4 @@ public class BoardWatcherTest {
 		return cardBuilder().id(idCard).build();
 	}
 
-	@Test
-	public void should_serialize_correctly()
-	{
-		assertThat(
-				transform(
-						fromJson(
-								fromType(asList(card("c01"), card("c02"))).toJson())
-								.to(Card.class)
-						, INTO_CARD_ID))
-				.containsOnly(("c01"), ("c02"));
-	}
-
-	@Test
-	public void should_deserialize_into_empty_collection() {
-		assertThat(fromJson("[]").to(Card.class)).isEmpty();
-	}
 }

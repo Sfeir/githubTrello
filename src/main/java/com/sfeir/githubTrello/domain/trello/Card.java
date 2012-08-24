@@ -6,8 +6,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Objects;
 
 import static com.google.common.base.Objects.*;
-import static com.sfeir.githubTrello.Json.*;
-import static java.util.Arrays.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class Card {
@@ -103,12 +101,5 @@ public final class Card {
 	private String idBoard;
 	private String idList;
 	private String name;
-
-
-	public static void main(String[] args) {
-		String json = fromType(asList(cardBuilder().id("c00").build(), cardBuilder().id("c01").build())).toJson();
-		System.out.println(json);
-		System.out.println(fromJson(json).to(Card.class));
-	}
 
 }
