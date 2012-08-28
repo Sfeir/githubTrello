@@ -8,9 +8,9 @@ import com.sfeir.githubTrello.domain.trello.Card;
 import com.sfeir.githubTrello.domain.trello.List;
 
 import static com.sfeir.githubTrello.BoardWatcher.*;
-import static com.sfeir.githubTrello.Json.*;
 import static com.sfeir.githubTrello.domain.trello.Card.*;
 import static com.sfeir.githubTrello.domain.trello.List.*;
+import static com.sfeir.githubTrello.wrapper.Json.*;
 import static java.util.Arrays.*;
 import static org.fest.assertions.Assertions.*;
 

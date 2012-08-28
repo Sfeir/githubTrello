@@ -38,8 +38,10 @@ public final class Card {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == this) return true;
-		if (obj == null) return false;
+		if (obj == this)
+			return true;
+		if (obj == null)
+			return false;
 
 		if (obj instanceof Card) {
 			Card other = (Card) obj;
@@ -48,7 +50,7 @@ public final class Card {
 		return false;
 	}
 
-	public final static Function<Card, String> INTO_CARD_ID = new Function<Card, String>() {
+	public static final Function<Card, String> INTO_CARD_ID = new Function<Card, String>() {
 		@Override
 		public String apply(Card card) {
 			return card.getId();

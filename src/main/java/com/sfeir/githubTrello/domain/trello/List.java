@@ -2,15 +2,10 @@ package com.sfeir.githubTrello.domain.trello;
 
 import java.util.Collection;
 
-import static com.sfeir.githubTrello.Json.*;
+import static com.sfeir.githubTrello.wrapper.Json.*;
 import static java.util.Collections.*;
 import static org.apache.commons.lang3.StringUtils.*;
 
-/**
- * A list in the Trello sense, a column of cards
- * @author Mr.MEDDAH
- *
- */
 public class List {
 
 	public String getId() {
@@ -35,7 +30,7 @@ public class List {
 
 	public Collection<Card> getCards() {
 		if (cards.isEmpty() && isNotEmpty(cardsInJson))
-			cards = fromJson(cardsInJson).to(Card.class);
+			cards = fromJson(cardsInJson).toCollection(Card.class);
 		return cards;
 	}
 
@@ -96,8 +91,6 @@ public class List {
 			return list;
 		}
 	}
-
-	public static final List HOLLOW_LIST = listBuilder().cardsInJson("[]").build();
 
 	private String id;
 	private String name;

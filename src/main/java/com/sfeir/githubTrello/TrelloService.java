@@ -1,46 +1,39 @@
 package com.sfeir.githubTrello;
 
 import com.sfeir.githubTrello.domain.trello.Board;
+import com.sfeir.githubTrello.domain.trello.Card;
 import com.sfeir.githubTrello.domain.trello.List;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
+import com.sfeir.githubTrello.wrapper.Rest;
 
-import static com.sfeir.githubTrello.Json.*;
 import static com.sfeir.githubTrello.domain.trello.List.*;
+import static com.sfeir.githubTrello.wrapper.Json.*;
 import static java.lang.String.*;
 
 public class TrelloService {
 
-	public TrelloService(String token) {
-		this.token = token;
-	}
-
 	public List getListWithCards(String initialListId) {
-		String cardsInJson = get(format("/lists/%s/cards", initialListId));
+		String cardsInJson = rest.get("/lists/%s/cards", initialListId);
 		return listBuilder().id(initialListId).cardsInJson(cardsInJson).build();
 	}
 
 	public String getListId(Board board, String listName) {
-		String listInJson = get(format("/boards/%s/lists", board.getId()));
-		for (List list : fromJson(listInJson).to(List.class))
+		String listInJson = rest.get("/boards/%s/lists", board.getId());
+		for (List list : fromJson(listInJson).toCollection(List.class))
 			if (listName.equals(list.getName()))
 				return list.getId();
 		return "-1";
 	}
 
-	private String get(String url) {
-		ClientResponse clientResponse = Client.create().resource(appendKeyTokenQuery(url)).accept("application/json")
-				.get(ClientResponse.class);
-		return clientResponse.getEntity(String.class);// TODO: Error case
+	public Card getCard(String cardId) {
+		String cardJson = rest.get("/cards/%s", cardId);
+		return fromJson(cardJson).toObject(Card.class);
 	}
 
-	private String appendKeyTokenQuery(String path) {
-		return format("%s%s?key=%s&token=%s", apiUrl, path, apiKey, token);
+	public TrelloService(String token) {
+		this.rest = new Rest(apiUrl, format("key=%s&token=%s", apiKey, token));
 	}
 
-	private final String token;
-
-	// TODO: Hardcoded api key
+	private Rest rest;
 	private static String apiKey = "d0e4aa36488c2e5957da7c3a61a76ff2";
 	private static String apiUrl = "https://api.trello.com/1";
 

@@ -17,28 +17,27 @@ import static com.sfeir.githubTrello.domain.trello.List.*;
 import static java.lang.String.*;
 import static org.apache.commons.dbutils.DbUtils.*;
 
-public class TrelloDatabase implements AutoCloseable {
+public final class TrelloDatabase implements AutoCloseable {
 
-	private static final String TABLE_NAME = "Trello_Snapshot";
-	private static final String SNAPSHOT_ID_FIELD = "snapshot_id";
-	private static final String TOKEN_FIELD = "token";
-	private static final String BOARD_ID_FIELD = "board_id";
-	private static final String LIST_ID_FIELD = "list_id";
-	private static final String CARDS_FIELD = "cards";
-
-	public static TrelloDatabase createTrelloDatabase(String token, Board board, String databaseName, String csvFile) throws SQLException {
+	public static TrelloDatabase createTrelloDatabase(String token, Board board, String name, String csvFile) throws SQLException {
 		checkArgument(new File(csvFile).isFile(), "File %s not found", csvFile);
+
+		TrelloDatabase trelloDatabase = new TrelloDatabase(token, board, csvFile);
+		trelloDatabase.init(name);
+		return trelloDatabase;
+	}
+
+	private void init(String name) throws SQLException {
 		String createTable = format(
 				"CREATE TABLE %s (%s INT PRIMARY KEY auto_increment, %s varchar(255), %s varchar(255), %s varchar(255), %s LONGVARCHAR) as SELECT * FROM CSVREAD('%s')",
 				TABLE_NAME, SNAPSHOT_ID_FIELD, TOKEN_FIELD, BOARD_ID_FIELD, LIST_ID_FIELD, CARDS_FIELD, csvFile);
 
-		String url = "jdbc:h2:mem:" + nullToEmpty(databaseName);
-		Connection connection = DriverManager.getConnection(url, "sa", "");
+		String url = "jdbc:h2:mem:" + nullToEmpty(name);
+		connection = DriverManager.getConnection(url, "sa", "");
 		connection.setAutoCommit(true);
 		try (Statement createStatement = connection.createStatement()) {
 			createStatement.execute(createTable);
 		}
-		return new TrelloDatabase(token, board, connection, csvFile);
 	}
 
 	public List getList(String listId) throws SQLException {
@@ -51,7 +50,7 @@ public class TrelloDatabase implements AutoCloseable {
 			selectStatement.setString(3, listId);
 			ResultSet results = selectStatement.executeQuery();
 			if (!results.next())
-				return HOLLOW_LIST;
+				return listBuilder().build();
 			return listBuilder().id(results.getString(LIST_ID_FIELD)).cardsInJson(results.getString(CARDS_FIELD)).build();
 		}
 	}
@@ -77,10 +76,9 @@ public class TrelloDatabase implements AutoCloseable {
 		closeQuietly(connection);
 	}
 
-	private TrelloDatabase(String token, Board board, Connection connection, String csvFile) {
+	private TrelloDatabase(String token, Board board, String csvFile) {
 		this.token = token;
 		this.board = board;
-		this.connection = connection;
 		this.csvFile = csvFile;
 	}
 
@@ -88,4 +86,11 @@ public class TrelloDatabase implements AutoCloseable {
 	private Board board;
 	private Connection connection;
 	private String csvFile;
+
+	private static final String TABLE_NAME = "Trello_Snapshot";
+	private static final String SNAPSHOT_ID_FIELD = "snapshot_id";
+	private static final String TOKEN_FIELD = "token";
+	private static final String BOARD_ID_FIELD = "board_id";
+	private static final String LIST_ID_FIELD = "list_id";
+	private static final String CARDS_FIELD = "cards";
 }
