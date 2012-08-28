@@ -32,11 +32,12 @@ public class TrelloService {
 	}
 
 	public TrelloService(String token) {
-		this.rest = new Rest(apiUrl, format("key=%s&token=%s", apiKey, token));
+		this.rest = new Rest(API_URL, format("key=%s&token=%s", API_KEY, token));
 	}
 
 	private Rest rest;
-	private static String apiKey = "d0e4aa36488c2e5957da7c3a61a76ff2";
-	private static String apiUrl = "https://api.trello.com/1";
+
+	private static final String API_URL = "https://api.trello.com/1";
+	private static final String API_KEY = "d0e4aa36488c2e5957da7c3a61a76ff2";
 
 }

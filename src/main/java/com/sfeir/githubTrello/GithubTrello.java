@@ -1,5 +1,6 @@
 package com.sfeir.githubTrello;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
@@ -9,52 +10,58 @@ import com.sfeir.githubTrello.domain.trello.Board;
 import com.sfeir.githubTrello.domain.trello.Card;
 import com.sfeir.githubTrello.domain.trello.List;
 
+import static com.google.common.base.Preconditions.*;
 import static com.sfeir.githubTrello.BoardWatcher.*;
 import static com.sfeir.githubTrello.GithubService.*;
 import static com.sfeir.githubTrello.TrelloDatabase.*;
-import static java.lang.System.*;
+import static java.lang.String.*;
 
 public final class GithubTrello {
 
 	public static void main(String[] args) {
 
-		String trelloToken = getProperty("trello.token");
-		String trelloBoardId = getProperty("trello.board-id");
-		String trelloToDoListName = getProperty("trello.to-do-list.name");
-		String trelloDoingListName = getProperty("trello.doing-list.list.name");
-		String githubToken = getProperty("github.token");
-		String githubUser = getProperty("github.user");
-		String githubRepository = getProperty("github.repo");
-		String githubDevelopBranch = getProperty("github.develop-branch");
+		String trelloToken = get("trello.token");
+		String trelloCsvDatabasePath = get("trello.csv.database");
+		String trelloBoardId = get("trello.board-id");
+		String trelloToDoListName = get("trello.to-do-list.name");
+		String trelloDoingListName = get("trello.doing-list.name");
+		String githubToken = get("github.token");
+		String githubUser = get("github.user");
+		String githubRepository = get("github.repo");
+		String githubDevelopBranch = get("github.develop-branch");
 
 		Board board = new Board(trelloBoardId);
 
 		TrelloService trelloService = new TrelloService(trelloToken);
 
-		String startListId = trelloService.getListId(board, trelloToDoListName);
-		String endListId = trelloService.getListId(board, trelloDoingListName);
+		String toDoListId = trelloService.getListId(board, trelloToDoListName);
+		String doingListId = trelloService.getListId(board, trelloDoingListName);
 
-		List newStartList = trelloService.getListWithCards(startListId);
-		List newEndList = trelloService.getListWithCards(endListId);
+		List newToDoList = trelloService.getListWithCards(toDoListId);
+		List newDoingList = trelloService.getListWithCards(doingListId);
 
-		List oldStartList = null;
-		List oldEndList = null;
+		List oldToDoList = null;
+		List oldDoingList = null;
 
-		try (TrelloDatabase database = createTrelloDatabase(trelloToken, board, "", "src/main/resources/snapshots.csv")) {
-			oldStartList = database.getList(startListId);
-			oldEndList = database.getList(endListId);
-			database.saveList(newStartList);
-			database.saveList(newEndList);
+		try (TrelloDatabase database = trelloDatabaseBuilder()
+				.board(board)
+				.csvFileName(trelloCsvDatabasePath)
+				.token(trelloToken)
+				.build()) {
+			oldToDoList = database.getList(toDoListId);
+			oldDoingList = database.getList(doingListId);
+			database.saveList(newToDoList);
+			database.saveList(newDoingList);
 		}
-		catch (SQLException e) {
+		catch (SQLException | IOException e) {
 			logger.error(e, e);
 		}
 
 		BoardWatcher toDoDoingWatcher = boardWatcherBuilder()
-				.oldStartList(oldStartList)
-				.newStartList(newStartList)
-				.oldEndList(oldEndList)
-				.newEndList(newEndList)
+				.oldStartList(oldToDoList)
+				.newStartList(newToDoList)
+				.oldEndList(oldDoingList)
+				.newEndList(newDoingList)
 				.build();
 
 		GithubService githubService = githubServiceBuilder()
@@ -66,8 +73,12 @@ public final class GithubTrello {
 
 		for (String cardId : toDoDoingWatcher.getMovedCards()) {
 			Card card = trelloService.getCard(cardId);
-			githubService.createFeatureBranch(card.getName());
+			githubService.createFeatureBranch(format("%s_%s", card.getName(), cardId));
 		}
+	}
+
+	private static String get(String property) {
+		return checkNotNull(System.getProperty(property), "Missing property " + property);
 	}
 
 	private GithubTrello() {}

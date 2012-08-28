@@ -48,6 +48,6 @@ public final class Json {
 
 	private Json() {}
 
-	private static ObjectMapper mapper = new ObjectMapper();
+	private static final ObjectMapper mapper = new ObjectMapper();
 	private static final Log logger = LogFactory.getLog(Json.class);
 }

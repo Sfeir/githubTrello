@@ -9,21 +9,18 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import com.sfeir.githubTrello.wrapper.Rest;
 
+import static com.sfeir.githubTrello.wrapper.Escape.*;
 import static java.lang.String.*;
 
 public class GithubService {
 
-	private Rest rest;
-	private String user;
-	private String repository;
-	private String baseBranchSha;
-
-
-	public void createFeatureBranch(String newBranch) {
+	public String createFeatureBranch(String newBranch) {
 		String refsUrl = format("/repos/%s/%s/git/refs", user, repository);
-		String input = format("{\"ref\": \"refs/heads/%s\",\"sha\": \"%s\"}", newBranch, baseBranchSha);
-		String result = rest.post(refsUrl, input);
-		logger.info(format("Feature branch %s created with output %s", newBranch, result));
+		String headBranch = escape(newBranch);
+		String input = format("{\"ref\": \"refs/heads/%s\",\"sha\": \"%s\"}", headBranch, baseBranchSha);
+		String branch = rest.post(refsUrl, input);
+		logger.info(format("Feature branch %s created with output %s", headBranch, branch));
+		return branch;
 	}
 
 	private void setBaseBranchSha(String baseBranch) {
@@ -42,8 +39,6 @@ public class GithubService {
 			logger.error(e, e);
 		}
 	}
-
-	private static String apiUrl = "https://api.github.com";
 
 	public static Builder githubServiceBuilder() {
 		return new GithubService.Builder();
@@ -77,7 +72,7 @@ public class GithubService {
 
 		public GithubService build() {
 			GithubService githubService = new GithubService();
-			githubService.rest = new Rest(apiUrl, format("access_token=%s", token));
+			githubService.rest = new Rest(API_URL, format("access_token=%s", token));
 			githubService.user = user;
 			githubService.repository = repository;
 			githubService.setBaseBranchSha(baseBranch);
@@ -85,5 +80,10 @@ public class GithubService {
 		}
 	}
 
+	private Rest rest;
+	private String user;
+	private String repository;
+	private String baseBranchSha;
 	private static final Log logger = LogFactory.getLog(GithubService.Builder.class);
+	private static final String API_URL = "https://api.github.com";
 }
