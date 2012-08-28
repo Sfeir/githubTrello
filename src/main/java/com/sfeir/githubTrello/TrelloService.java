@@ -18,15 +18,17 @@ public class TrelloService {
 
 	public String getListId(Board board, String listName) {
 		String listInJson = rest.get("/boards/%s/lists", board.getId());
-		for (List list : fromJson(listInJson).toCollection(List.class))
-			if (listName.equals(list.getName()))
+		for (List list : fromJsonToObjects(listInJson, List.class)) {
+			if (listName.equals(list.getName())) {
 				return list.getId();
+			}
+		}
 		return "-1";
 	}
 
 	public Card getCard(String cardId) {
 		String cardJson = rest.get("/cards/%s", cardId);
-		return fromJson(cardJson).toObject(Card.class);
+		return fromJsonToObject(cardJson, Card.class);
 	}
 
 	public TrelloService(String token) {

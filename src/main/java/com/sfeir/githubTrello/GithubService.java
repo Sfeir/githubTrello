@@ -34,8 +34,9 @@ public class GithubService {
 			if (node == null) {
 				logger.info(format("Originating commit for base branch %s not found", baseBranch));
 			}
-			else
+			else {
 				baseBranchSha = node.get("object").get("sha").getTextValue();
+			}
 		}
 		catch (IOException e) {
 			logger.error(e, e);

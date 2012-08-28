@@ -10,75 +10,44 @@ import org.codehaus.jackson.map.ObjectMapper;
 import static java.util.Collections.*;
 
 public final class Json {
-
-	public static JsonToType fromJson(String json) {
-		return new JsonToType(json);
+	public static <T> T fromJsonToObject(String json, Class<T> type) {
+		try {
+			return mapper.readValue(json, type);
+		}
+		catch (IOException ioe) {
+			try {
+				return type.newInstance();
+			}
+			catch (InstantiationException | IllegalAccessException roe) {
+				logger.error(ioe, ioe);
+				logger.error(roe, roe);
+				return null;
+			}
+		}
 	}
 
-	public static class JsonToType {
-		public JsonToType(String json) {
-			this.json = json;
-			this.mapper = new ObjectMapper();
+	public static <T> Collection<T> fromJsonToObjects(String json, Class<T> type) {
+		try {
+			return mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(Collection.class, type));
 		}
-
-		public <T> T toObject(Class<T> type) {
-			try {
-				return mapper.readValue(json, type);
-			}
-			catch (IOException ioe) {
-				try {
-					return type.newInstance();
-				}
-				catch (InstantiationException | IllegalAccessException roe) {
-					logger.error(ioe, ioe);
-					logger.error(roe, roe);
-					return null;
-				}
-			}
-		}
-
-		public <T> Collection<T> toCollection(Class<T> type) {
-			try {
-				return mapper.<Collection<T>> readValue(json, mapper.getTypeFactory().constructCollectionType(Collection.class, type));
-			}
-			catch (IOException e) {
-				logger.info(e, e);
-			}
+		catch (IOException e) {
+			logger.info(e, e);
 			return emptyList();
 		}
-
-		private ObjectMapper mapper;
-
-		private String json;
 	}
 
-	public static TypeToJson fromType(Object object) {
-		return new TypeToJson(object);
-	}
-
-
-	public static class TypeToJson {
-		public TypeToJson(Object objects) {
-			this.objects = objects;
-			this.mapper = new ObjectMapper();
+	public static String fromObjectToJson(Object object) {
+		try {
+			return mapper.writeValueAsString(object);
 		}
-
-		public String toJson()
-		{
-			try {
-				return mapper.writeValueAsString(objects);
-			}
-			catch (IOException e) {
-				logger.error(e, e);
-				return "";
-			}
+		catch (IOException e) {
+			logger.error(e, e);
+			return "";
 		}
-
-		private Object objects;
-		private ObjectMapper mapper;
 	}
 
 	private Json() {}
 
+	private static ObjectMapper mapper = new ObjectMapper();
 	private static final Log logger = LogFactory.getLog(Json.class);
 }

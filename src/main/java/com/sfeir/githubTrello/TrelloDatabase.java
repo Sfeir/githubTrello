@@ -49,8 +49,9 @@ public final class TrelloDatabase implements AutoCloseable {
 			selectStatement.setString(2, board.getId());
 			selectStatement.setString(3, listId);
 			ResultSet results = selectStatement.executeQuery();
-			if (!results.next())
+			if (!results.next()) {
 				return listBuilder().build();
+			}
 			return listBuilder().id(results.getString(LIST_ID_FIELD)).cardsInJson(results.getString(CARDS_FIELD)).build();
 		}
 	}
@@ -72,8 +73,12 @@ public final class TrelloDatabase implements AutoCloseable {
 
 	@Override
 	public void close() throws SQLException {
-		connection.createStatement().execute(format("CALL CSVWRITE('%s', 'SELECT * FROM %s')", csvFile, TABLE_NAME));
-		closeQuietly(connection);
+		try {
+			connection.createStatement().execute(format("CALL CSVWRITE('%s', 'SELECT * FROM %s')", csvFile, TABLE_NAME));
+		}
+		finally {
+			closeQuietly(connection);
+		}
 	}
 
 	private TrelloDatabase(String token, Board board, String csvFile) {

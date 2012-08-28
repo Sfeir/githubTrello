@@ -34,8 +34,7 @@ public class Rest {
 	}
 
 	private static String getResponseEntity(ClientResponse clientResponse) {
-		if (clientResponse.getClientResponseStatus().getFamily() != Family.SUCCESSFUL)
-		{
+		if (clientResponse.getClientResponseStatus().getFamily() != Family.SUCCESSFUL) {
 			logger.error("Failed : HTTP error code : " + clientResponse.getStatus());
 			return "";
 		}

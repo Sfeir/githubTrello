@@ -29,8 +29,9 @@ public class List {
 	}
 
 	public Collection<Card> getCards() {
-		if (cards.isEmpty() && isNotEmpty(cardsInJson))
-			cards = fromJson(cardsInJson).toCollection(Card.class);
+		if (cards.isEmpty() && isNotEmpty(cardsInJson)) {
+			cards = fromJsonToObjects(cardsInJson, Card.class);
+		}
 		return cards;
 	}
 

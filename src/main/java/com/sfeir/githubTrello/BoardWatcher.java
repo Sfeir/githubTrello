@@ -23,11 +23,6 @@ public class BoardWatcher {
 		return intersection(endListCardIds, startListCardIds);
 	}
 
-	private List oldStartList;
-	private List newStartList;
-	private List oldEndList;
-	private List newEndList;
-
 	private static <T> Collection<T> difference(Collection<T> left, Collection<T> right)
 	{
 		Collection<T> result = newArrayList(left);
@@ -81,4 +76,9 @@ public class BoardWatcher {
 		private List oldEndList;
 		private List newEndList;
 	}
+
+	private List oldStartList;
+	private List newStartList;
+	private List oldEndList;
+	private List newEndList;
 }

@@ -45,12 +45,10 @@ public class BoardWatcherTest {
 	}
 
 	private static List list(String listId, Card... cards) {
-		return listBuilder().id(listId)
-				.cardsInJson(fromType(asList(cards)).toJson()).build();
+		return listBuilder().id(listId).cardsInJson(fromObjectToJson(asList(cards))).build();
 	}
 
-	private static Card card(String idCard)
-	{
+	private static Card card(String idCard) {
 		return cardBuilder().id(idCard).build();
 	}
 
