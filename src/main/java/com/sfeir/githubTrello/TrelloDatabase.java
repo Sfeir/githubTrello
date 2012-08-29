@@ -30,8 +30,7 @@ public final class TrelloDatabase implements AutoCloseable {
 			table += format(" as SELECT * FROM CSVREAD('%s')", csvFileName);
 		}
 		else {
-			if (!csvFile.createNewFile())
-			{
+			if (!csvFile.createNewFile()) {
 				throw new IOException("Can't create file " + csvFileName);
 			}
 		}

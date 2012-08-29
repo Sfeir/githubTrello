@@ -12,7 +12,7 @@ public class Escape {
 	}
 
 	private static String stripAccents(String word) {
-		return Normalizer.normalize(word, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+		return Normalizer.normalize(word, Normalizer.Form.NFD).replaceAll("\\p{IsM}+", "");
 	}
 
 	private Escape() {}

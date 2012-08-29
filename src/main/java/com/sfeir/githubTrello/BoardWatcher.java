@@ -23,15 +23,13 @@ public class BoardWatcher {
 		return intersection(endListCardIds, startListCardIds);
 	}
 
-	private static <T> Collection<T> difference(Collection<T> left, Collection<T> right)
-	{
+	private static <T> Collection<T> difference(Collection<T> left, Collection<T> right) {
 		Collection<T> result = newArrayList(left);
 		result.removeAll(right);
 		return result;
 	}
 
-	private static <T> Collection<T> intersection(Collection<T> left, Collection<T> right)
-	{
+	private static <T> Collection<T> intersection(Collection<T> left, Collection<T> right) {
 		Collection<T> result = newArrayList(left);
 		result.retainAll(right);
 		return result;
