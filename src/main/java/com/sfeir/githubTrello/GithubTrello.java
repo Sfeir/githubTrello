@@ -59,8 +59,8 @@ public final class GithubTrello {
 
 		BoardWatcher toDoDoingWatcher = boardWatcherBuilder()
 				.oldStartList(oldToDoList)
-				.newStartList(newToDoList)
 				.oldEndList(oldDoingList)
+				.newStartList(newToDoList)
 				.newEndList(newDoingList)
 				.build();
 

@@ -2,13 +2,12 @@ package com.sfeir.githubTrello.domain.trello;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
 
 import static com.google.common.base.Objects.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public final class Card {
+public class Card {
 
 	public String getId() {
 		return this.id;
@@ -51,13 +50,6 @@ public final class Card {
 		}
 		return false;
 	}
-
-	public static final Function<Card, String> INTO_CARD_ID = new Function<Card, String>() {
-		@Override
-		public String apply(Card card) {
-			return card.getId();
-		}
-	};
 
 	public static Builder cardBuilder() {
 		return new Card.Builder();
