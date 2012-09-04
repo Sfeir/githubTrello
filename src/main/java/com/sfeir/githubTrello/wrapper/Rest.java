@@ -42,13 +42,18 @@ public class Rest {
 			return getResponseEntity(initRequest().put(ClientResponse.class));
 		}
 
+		public String delete() {
+			initRequest().delete(ClientResponse.class);
+			return "";
+		}
+
 		private Builder initRequest() {
-			System.out.println(url);
 			return Client.create().resource(url).accept(APPLICATION_JSON);
 		}
 
 		private static String getResponseEntity(ClientResponse clientResponse) {
-			if (clientResponse.getClientResponseStatus().getFamily() != Family.SUCCESSFUL) {
+			if (clientResponse.getClientResponseStatus() == null ||
+					clientResponse.getClientResponseStatus().getFamily() != Family.SUCCESSFUL) {
 				logger.error("Failed : HTTP error code : " + clientResponse.getStatus(), new Exception());
 				return "";
 			}

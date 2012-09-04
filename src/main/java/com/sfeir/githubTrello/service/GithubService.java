@@ -1,44 +1,40 @@
 package com.sfeir.githubTrello.service;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import com.google.common.collect.ImmutableMap;
 import com.sfeir.githubTrello.wrapper.Rest;
 
-import static com.sfeir.githubTrello.wrapper.Escape.*;
+import static com.sfeir.githubTrello.wrapper.Json.*;
 import static java.lang.String.*;
 
 public class GithubService {
 
 	public String createFeatureBranch(String branchName) {
-		String headBranchName = escape(branchName);
-		Map<String, ?> input = ImmutableMap.of("ref", "refs/heads/" + headBranchName, "sha", baseBranchSha);
+		Map<String, ?> input = ImmutableMap.of("ref", "refs/heads/" + branchName, "sha", baseBranchSha);
 		String branch = rest.url("/repos/%s/%s/git/refs", user, repository).post(input);
-		logger.info(format("Feature branch %s created with output %s", headBranchName, branch));
+		logger.info(format("Feature branch %s created with output %s", branchName, branch));
 		return branch;
 	}
 
 	private void setBaseBranchSha(String baseBranch) {
 		baseBranchSha = "";
-		try {
-			String source = rest.url("/repos/%s/%s/git/refs/heads/%s", user, repository, baseBranch).get();
-			JsonNode node = new ObjectMapper().readValue(source, JsonNode.class);
-			if (node == null) {
-				logger.info(format("Originating commit for base branch %s not found", baseBranch));
-			}
-			else {
-				baseBranchSha = node.get("object").get("sha").getTextValue();
-			}
+		String source = rest.url("/repos/%s/%s/git/refs/heads/%s", user, repository, baseBranch).get();
+		JsonNode node = fromJsonToObject(source, JsonNode.class);
+		if (node == null) {
+			logger.info(format("Originating commit for base branch %s not found", baseBranch));
 		}
-		catch (IOException e) {
-			logger.error(e, e);
+		else {
+			baseBranchSha = node.get("object").get("sha").getTextValue();
 		}
+	}
+
+	public Rest getRestWrapper() {
+		return rest;
 	}
 
 	public static Builder githubServiceBuilder() {

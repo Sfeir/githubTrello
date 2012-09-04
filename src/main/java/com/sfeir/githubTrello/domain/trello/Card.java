@@ -51,6 +51,7 @@ public class Card {
 		return false;
 	}
 
+
 	public Card withNewList(List newList) {
 		return cardBuilder().id(id).idBoard(idBoard).name(name).idList(newList.getId()).build();
 	}

@@ -17,6 +17,7 @@ import static com.sfeir.githubTrello.BoardWatcher.*;
 import static com.sfeir.githubTrello.TrelloDatabase.*;
 import static com.sfeir.githubTrello.domain.trello.List.*;
 import static com.sfeir.githubTrello.service.GithubService.*;
+import static com.sfeir.githubTrello.wrapper.Escape.*;
 import static java.lang.String.*;
 
 public final class Main {
@@ -72,7 +73,7 @@ public final class Main {
 
 		for (String cardId : toDoDoingWatcher.getMovedCards()) {
 			Card card = trelloService.getCard(cardId);
-			githubService.createFeatureBranch(format("%s_%s", card.getName(), cardId));
+			githubService.createFeatureBranch(escape(format("%s_%s", card.getName(), cardId)));
 		}
 	}
 
