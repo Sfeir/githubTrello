@@ -9,14 +9,17 @@ import org.apache.commons.logging.LogFactory;
 import com.sfeir.githubTrello.domain.trello.Board;
 import com.sfeir.githubTrello.domain.trello.Card;
 import com.sfeir.githubTrello.domain.trello.List;
+import com.sfeir.githubTrello.service.GithubService;
+import com.sfeir.githubTrello.service.TrelloService;
 
 import static com.google.common.base.Preconditions.*;
 import static com.sfeir.githubTrello.BoardWatcher.*;
-import static com.sfeir.githubTrello.GithubService.*;
 import static com.sfeir.githubTrello.TrelloDatabase.*;
+import static com.sfeir.githubTrello.domain.trello.List.*;
+import static com.sfeir.githubTrello.service.GithubService.*;
 import static java.lang.String.*;
 
-public final class GithubTrello {
+public final class Main {
 
 	public static void main(String[] args) {
 
@@ -34,22 +37,18 @@ public final class GithubTrello {
 
 		TrelloService trelloService = new TrelloService(trelloToken);
 
-		String toDoListId = trelloService.getListId(board, trelloToDoListName);
-		String doingListId = trelloService.getListId(board, trelloDoingListName);
-
-		List newToDoList = trelloService.getListWithCards(toDoListId);
-		List newDoingList = trelloService.getListWithCards(doingListId);
-
-		List oldToDoList = null;
-		List oldDoingList = null;
+		List newToDoList = trelloService.getList(board, trelloToDoListName);
+		List newDoingList = trelloService.getList(board, trelloDoingListName);
+		List oldToDoList = listBuilder().build();
+		List oldDoingList = listBuilder().build();
 
 		try (TrelloDatabase database = trelloDatabaseBuilder()
 				.board(board)
 				.csvFileName(trelloCsvDatabasePath)
 				.token(trelloToken)
 				.build()) {
-			oldToDoList = database.getList(toDoListId);
-			oldDoingList = database.getList(doingListId);
+			oldToDoList = database.getList(newToDoList.getId());
+			oldDoingList = database.getList(newDoingList.getId());
 			database.saveList(newToDoList);
 			database.saveList(newDoingList);
 		}
@@ -81,7 +80,7 @@ public final class GithubTrello {
 		return checkNotNull(System.getProperty(property), "Missing property " + property);
 	}
 
-	private GithubTrello() {}
+	private Main() {}
 
-	private static final Log logger = LogFactory.getLog(GithubTrello.class);
+	private static final Log logger = LogFactory.getLog(Main.class);
 }

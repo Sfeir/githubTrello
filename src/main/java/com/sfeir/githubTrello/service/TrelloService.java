@@ -1,4 +1,4 @@
-package com.sfeir.githubTrello;
+package com.sfeir.githubTrello.service;
 
 import com.sfeir.githubTrello.domain.trello.Board;
 import com.sfeir.githubTrello.domain.trello.Card;
@@ -11,28 +11,27 @@ import static java.lang.String.*;
 
 public class TrelloService {
 
-	public List getListWithCards(String initialListId) {
-		String cardsInJson = rest.get("/lists/%s/cards", initialListId);
-		return listBuilder().id(initialListId).cardsInJson(cardsInJson).build();
-	}
-
-	public String getListId(Board board, String listName) {
-		String listInJson = rest.get("/boards/%s/lists", board.getId());
+	public List getList(Board board, String listName) {
+		String listInJson = rest.url("/boards/%s/lists", board.getId()).get();
 		for (List list : fromJsonToObjects(listInJson, List.class)) {
 			if (listName.equals(list.getName())) {
-				return list.getId();
+				return list.withNewCardsInJson(rest.url("/lists/%s/cards", list.getId()).get());
 			}
 		}
-		return "-1";
+		return listBuilder().build();
 	}
 
 	public Card getCard(String cardId) {
-		String cardJson = rest.get("/cards/%s", cardId);
+		String cardJson = rest.url("/cards/%s", cardId).get();
 		return fromJsonToObject(cardJson, Card.class);
 	}
 
 	public TrelloService(String token) {
-		this.rest = new Rest(API_URL, format("key=%s&token=%s", API_KEY, token));
+		this.rest = new Rest(API_URL, format("&key=%s&token=%s", API_KEY, token));
+	}
+
+	public Rest getRestWrapper() {
+		return rest;
 	}
 
 	private Rest rest;
