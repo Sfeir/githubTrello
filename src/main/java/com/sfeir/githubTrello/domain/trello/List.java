@@ -31,7 +31,7 @@ public class List {
 	}
 
 	public String getCardsInJson() {
-		return cardsInJson;
+		return cardsInJson;//TODO: Convert from json outside?
 	}
 
 	public List withNewCardsInJson(String newCardsInJson) {

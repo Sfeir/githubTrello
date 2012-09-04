@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.sfeir.githubTrello.domain.github.Repository;
 import com.sfeir.githubTrello.domain.trello.Board;
 import com.sfeir.githubTrello.domain.trello.Card;
 import com.sfeir.githubTrello.domain.trello.List;
@@ -15,8 +16,8 @@ import com.sfeir.githubTrello.service.TrelloService;
 import static com.google.common.base.Preconditions.*;
 import static com.sfeir.githubTrello.BoardWatcher.*;
 import static com.sfeir.githubTrello.TrelloDatabase.*;
+import static com.sfeir.githubTrello.domain.github.Repository.*;
 import static com.sfeir.githubTrello.domain.trello.List.*;
-import static com.sfeir.githubTrello.service.GithubService.*;
 import static com.sfeir.githubTrello.wrapper.Escape.*;
 import static java.lang.String.*;
 
@@ -31,7 +32,7 @@ public final class Main {
 		String trelloDoingListName = get("trello.doing-list.name");
 		String githubToken = get("github.token");
 		String githubUser = get("github.user");
-		String githubRepository = get("github.repo");
+		String githubRepositoryName = get("github.repo");
 		String githubDevelopBranch = get("github.develop-branch");
 
 		Board board = new Board(trelloBoardId);
@@ -64,12 +65,13 @@ public final class Main {
 				.newEndList(newDoingList)
 				.build();
 
-		GithubService githubService = githubServiceBuilder()
-				.token(githubToken)
-				.user(githubUser)
-				.repository(githubRepository)
+		Repository githubRepository = repositoryBuilder()
 				.baseBranch(githubDevelopBranch)
+				.user(githubUser)
+				.name(githubRepositoryName)
 				.build();
+
+		GithubService githubService = new GithubService(githubRepository, githubToken);
 
 		for (String cardId : toDoDoingWatcher.getMovedCards()) {
 			Card card = trelloService.getCard(cardId);

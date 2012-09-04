@@ -20,11 +20,11 @@ public class Rest {
 
 	public Rest(String apiUrl, String authenticationQuery) {
 		this.apiUrl = apiUrl;
-		this.authenticationQuery = authenticationQuery;
+		this.authenticationQuery = authenticationQuery;//TODO authentication query format
 	}
 
-	public RestUrl url(String pathFormat, Object... pathParameters) {
-		String url = apiUrl + format(pathFormat, pathParameters) +
+	public RestUrl url(String pathFormat, String... pathParameters) {
+		String url = apiUrl + format(pathFormat, (Object[]) pathParameters) +
 				(containsNone(pathFormat, "?") ? "?" : "") + authenticationQuery;
 		return new RestUrl(url);
 	}
