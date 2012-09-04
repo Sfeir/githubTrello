@@ -1,13 +1,14 @@
-package com.sfeir.githubTrello;
+package com.sfeir.githubTrello.wrapper;
 
 import org.junit.Test;
 
 import com.sfeir.githubTrello.domain.trello.Card;
 
-import static com.sfeir.githubTrello.domain.trello.Card.*;
+import static com.sfeir.githubTrello.Tools.*;
 import static com.sfeir.githubTrello.wrapper.Json.*;
 import static java.util.Arrays.*;
 import static org.fest.assertions.Assertions.*;
+
 
 public class JsonTest {
 
@@ -30,7 +31,5 @@ public class JsonTest {
 		assertThat(fromJsonToObject("", Card.class)).isEqualTo(card(null));
 	}
 
-	private static Card card(String idCard) {
-		return cardBuilder().id(idCard).build();
-	}
+
 }

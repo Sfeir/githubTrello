@@ -1,4 +1,4 @@
-package com.sfeir.githubTrello;
+package com.sfeir.githubTrello.wrapper;
 
 import org.junit.Test;
 

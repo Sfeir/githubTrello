@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import static java.util.Collections.*;
@@ -44,6 +45,16 @@ public final class Json {
 			logger.error(e, e);
 			return "";
 		}
+	}
+
+	public static String extractValue(String json, String... attributes)
+	{
+		JsonNode node = fromJsonToObject(json, JsonNode.class);
+		for (String attribute : attributes) {
+			node = node.get(attribute);
+		}
+		return node.getTextValue();
+
 	}
 
 	private Json() {}

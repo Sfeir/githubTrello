@@ -5,11 +5,9 @@ import java.util.Collection;
 import com.sfeir.githubTrello.domain.trello.Card;
 import com.sfeir.githubTrello.domain.trello.List;
 
-import static com.google.common.collect.Collections2.*;
+import static ch.lambdaj.Lambda.*;
 
 import static com.google.common.collect.Lists.*;
-
-import static com.sfeir.githubTrello.domain.trello.Card.*;
 
 public class BoardWatcher {
 
@@ -17,8 +15,8 @@ public class BoardWatcher {
 		Collection<Card> startListCards = difference(oldStartList.getCards(), newStartList.getCards());
 		Collection<Card> endListCards = difference(newEndList.getCards(), oldEndList.getCards());
 
-		Collection<String> startListCardIds = transform(startListCards, INTO_CARD_ID);
-		Collection<String> endListCardIds = transform(endListCards, INTO_CARD_ID);
+		Collection<String> startListCardIds = extract(startListCards, on(Card.class).getId());
+		Collection<String> endListCardIds = extract(endListCards, on(Card.class).getId());
 
 		return intersection(endListCardIds, startListCardIds);
 	}

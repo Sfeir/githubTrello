@@ -2,10 +2,13 @@ package com.sfeir.githubTrello.domain.trello;
 
 import java.util.Collection;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import static com.sfeir.githubTrello.wrapper.Json.*;
 import static java.util.Collections.*;
 import static org.apache.commons.lang3.StringUtils.*;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class List {
 
 	public String getId() {
@@ -20,14 +23,6 @@ public class List {
 		return idBoard;
 	}
 
-	public boolean isClosed() {
-		return closed;
-	}
-
-	public int getPos() {
-		return pos;
-	}
-
 	public Collection<Card> getCards() {
 		if (cards.isEmpty() && isNotEmpty(cardsInJson)) {
 			cards = fromJsonToObjects(cardsInJson, Card.class);
@@ -36,7 +31,16 @@ public class List {
 	}
 
 	public String getCardsInJson() {
-		return cardsInJson;
+		return cardsInJson;//TODO: Convert from json outside?
+	}
+
+	public List withNewCardsInJson(String newCardsInJson) {
+		return listBuilder()
+				.id(this.id)
+				.name(this.name)
+				.idBoard(this.idBoard)
+				.cardsInJson(newCardsInJson)
+				.build();
 	}
 
 	public static Builder listBuilder() {
@@ -44,12 +48,6 @@ public class List {
 	}
 
 	public static class Builder {
-		private String id;
-		private String name;
-		private boolean closed;
-		private String idBoard;
-		private int pos;
-		private String cardsInJson;
 
 		public Builder id(String id) {
 			this.id = id;
@@ -61,18 +59,8 @@ public class List {
 			return this;
 		}
 
-		public Builder closed(boolean closed) {
-			this.closed = closed;
-			return this;
-		}
-
 		public Builder idBoard(String idBoard) {
 			this.idBoard = idBoard;
-			return this;
-		}
-
-		public Builder pos(int pos) {
-			this.pos = pos;
 			return this;
 		}
 
@@ -86,18 +74,19 @@ public class List {
 			list.cardsInJson = cardsInJson;
 			list.id = id;
 			list.name = name;
-			list.closed = closed;
 			list.idBoard = idBoard;
-			list.pos = pos;
 			return list;
 		}
+
+		private String id;
+		private String name;
+		private String idBoard;
+		private String cardsInJson;
 	}
 
 	private String id;
 	private String name;
-	private boolean closed;
 	private String idBoard;
-	private int pos;
 	private Collection<Card> cards = emptyList();
 	private String cardsInJson;
 }

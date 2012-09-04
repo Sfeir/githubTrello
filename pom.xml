@@ -64,6 +64,11 @@
 			<artifactId>commons-logging</artifactId>
 			<version>1.1.1</version>
 		</dependency>
+		<dependency>
+			<groupId>com.googlecode.lambdaj</groupId>
+			<artifactId>lambdaj</artifactId>
+			<version>2.3.3</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -88,7 +93,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>com.sfeir.githubTrello.GithubTrello</mainClass>
+							<mainClass>com.sfeir.githubTrello.Main</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
