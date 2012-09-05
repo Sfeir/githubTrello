@@ -3,6 +3,7 @@ package com.sfeir.githubTrello.domain.trello;
 import java.util.Collection;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import static com.sfeir.githubTrello.wrapper.Json.*;
 import static java.util.Collections.*;
@@ -19,8 +20,8 @@ public class List {
 		return name;
 	}
 
-	public String getIdBoard() {
-		return idBoard;
+	public String getBoardId() {
+		return boardId;
 	}
 
 	public Collection<Card> getCards() {
@@ -38,7 +39,7 @@ public class List {
 		return listBuilder()
 				.id(this.id)
 				.name(this.name)
-				.idBoard(this.idBoard)
+				.boardId(this.boardId)
 				.cardsInJson(newCardsInJson)
 				.build();
 	}
@@ -59,8 +60,8 @@ public class List {
 			return this;
 		}
 
-		public Builder idBoard(String idBoard) {
-			this.idBoard = idBoard;
+		public Builder boardId(String boardId) {
+			this.boardId = boardId;
 			return this;
 		}
 
@@ -74,19 +75,19 @@ public class List {
 			list.cardsInJson = cardsInJson;
 			list.id = id;
 			list.name = name;
-			list.idBoard = idBoard;
+			list.boardId = boardId;
 			return list;
 		}
 
 		private String id;
 		private String name;
-		private String idBoard;
+		private String boardId;
 		private String cardsInJson;
 	}
 
 	private String id;
 	private String name;
-	private String idBoard;
+	@JsonProperty("idBoard") private String boardId;
 	private Collection<Card> cards = emptyList();
 	private String cardsInJson;
 }

@@ -1,6 +1,7 @@
 package com.sfeir.githubTrello.domain.trello;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.google.common.base.Objects;
 
@@ -13,12 +14,12 @@ public class Card {
 		return this.id;
 	}
 
-	public String getIdBoard() {
-		return this.idBoard;
+	public String getBoardId() {
+		return this.boardId;
 	}
 
-	public String getIdList() {
-		return this.idList;
+	public String getListId() {
+		return this.listId;
 	}
 
 	public String getName() {
@@ -27,12 +28,12 @@ public class Card {
 
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this).add("id", id).add("idBoard", idBoard).add("idList", idList).add("name", name).toString();
+		return toStringHelper(this).add("id", id).add("boardId", boardId).add("listId", listId).add("name", name).toString();
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(id, idBoard, idList, name);
+		return Objects.hashCode(id, boardId, listId, name);
 	}
 
 	@Override
@@ -43,17 +44,16 @@ public class Card {
 		if (obj == null) {
 			return false;
 		}
-
 		if (obj instanceof Card) {
 			Card other = (Card) obj;
-			return equal(id, other.id) && equal(idBoard, other.idBoard) && equal(idList, other.idList) && equal(name, other.name);
+			return equal(id, other.id) && equal(boardId, other.boardId) && equal(listId, other.listId) && equal(name, other.name);
 		}
 		return false;
 	}
 
 
-	public Card withNewList(List newList) {
-		return cardBuilder().id(id).idBoard(idBoard).name(name).idList(newList.getId()).build();
+	public Card inNewList(List newList) {
+		return cardBuilder().id(id).boardId(boardId).name(name).listId(newList.getId()).build();
 	}
 
 	public static Builder cardBuilder() {
@@ -63,8 +63,8 @@ public class Card {
 
 	public static class Builder {
 		private String id;
-		private String idBoard;
-		private String idList;
+		private String boardId;
+		private String listId;
 		private String name;
 
 		public Builder id(String id) {
@@ -72,13 +72,13 @@ public class Card {
 			return this;
 		}
 
-		public Builder idBoard(String idBoard) {
-			this.idBoard = idBoard;
+		public Builder boardId(String boardId) {
+			this.boardId = boardId;
 			return this;
 		}
 
-		public Builder idList(String idList) {
-			this.idList = idList;
+		public Builder listId(String listId) {
+			this.listId = listId;
 			return this;
 		}
 
@@ -90,8 +90,8 @@ public class Card {
 		public Card build() {
 			Card card = new Card();
 			card.id = id;
-			card.idBoard = idBoard;
-			card.idList = idList;
+			card.boardId = boardId;
+			card.listId = listId;
 			card.name = name;
 			return card;
 		}
@@ -99,8 +99,8 @@ public class Card {
 
 
 	private String id;
-	private String idBoard;
-	private String idList;
 	private String name;
+	@JsonProperty("idBoard") private String boardId;
+	@JsonProperty("idList") private String listId;
 
 }

@@ -31,7 +31,7 @@ public class TrelloServiceTest {
 	public void should_have_one_card_in_second_list() {
 		service.moveCard(CARD_1, SECOND_LIST);
 		assertThat(service.getList(board, FIRST_LIST.getName()).getCards()).containsOnly(CARD_2, CARD_3);
-		assertThat(service.getList(board, SECOND_LIST.getName()).getCards()).containsOnly(CARD_1.withNewList(SECOND_LIST));
+		assertThat(service.getList(board, SECOND_LIST.getName()).getCards()).containsOnly(CARD_1.inNewList(SECOND_LIST));
 	}
 
 	@Test

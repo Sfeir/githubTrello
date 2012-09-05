@@ -14,11 +14,11 @@ public class Tools {
 		return listBuilder().id(listId).name(name).cardsInJson(fromObjectToJson(asList(cards))).build();
 	}
 
-	public static Card card(String name, String idCard, String idList, String idBoard) {
-		return cardBuilder().name(name).id(idCard).idList(idList).idBoard(idBoard).build();
+	public static Card card(String name, String cardId, String listId, String boardId) {
+		return cardBuilder().name(name).id(cardId).listId(listId).boardId(boardId).build();
 	}
 
-	public static Card card(String idCard) {
-		return cardBuilder().id(idCard).build();
+	public static Card card(String cardId) {
+		return cardBuilder().id(cardId).build();
 	}
 }
