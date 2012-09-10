@@ -16,20 +16,22 @@ import static java.lang.String.*;
 import static javax.ws.rs.core.MediaType.*;
 import static org.apache.commons.lang3.StringUtils.*;
 
-public class Rest {
+public class RestClient {
 
-	public Rest(String apiUrl, String authenticationQuery) {
+	public RestClient(String apiUrl, String authenticationQuery) {
 		this.apiUrl = apiUrl;
 		this.authenticationQuery = authenticationQuery;//TODO authentication query format
 	}
 
-	public RestUrl url(String pathFormat, String... pathParameters) {
-		String url = apiUrl + format(pathFormat, (Object[]) pathParameters) +
-				(containsNone(pathFormat, "?") ? "?" : "") + authenticationQuery;
-		return new RestUrl(url);
+	public RestClientUrl url(String pathFormat, String... pathParameters) {//FIXME: Clean
+		String url = apiUrl
+				+ format(pathFormat.replace(apiUrl, ""), (Object[]) pathParameters)
+				+ (containsNone(pathFormat, "?") ? "?" : "")
+				+ authenticationQuery;
+		return new RestClientUrl(url);
 	}
 
-	public static class RestUrl {
+	public static class RestClientUrl {
 		public String get() {
 			return getResponseEntity(initRequest().get(ClientResponse.class));
 		}
@@ -51,16 +53,16 @@ public class Rest {
 			return Client.create().resource(url).accept(APPLICATION_JSON);
 		}
 
-		private static String getResponseEntity(ClientResponse clientResponse) {
+		private String getResponseEntity(ClientResponse clientResponse) {
 			if (clientResponse.getClientResponseStatus() == null ||
 					clientResponse.getClientResponseStatus().getFamily() != Family.SUCCESSFUL) {
-				logger.error("Failed : HTTP error code : " + clientResponse.getStatus(), new Exception());
+				logger.warn("Failed : HTTP error code : " + clientResponse.getStatus() + "\nUrl: " + url);
 				return "";
 			}
 			return clientResponse.getEntity(String.class);
 		}
 
-		private RestUrl(String url) {
+		private RestClientUrl(String url) {
 			this.url = url;
 		}
 
@@ -70,5 +72,5 @@ public class Rest {
 	private final String apiUrl;
 	private final String authenticationQuery;
 
-	private static final Log logger = LogFactory.getLog(Rest.class);
+	private static final Log logger = LogFactory.getLog(RestClient.class);
 }

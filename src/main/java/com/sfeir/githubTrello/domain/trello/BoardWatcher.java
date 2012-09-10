@@ -1,9 +1,7 @@
-package com.sfeir.githubTrello;
+package com.sfeir.githubTrello.domain.trello;
 
 import java.util.Collection;
 
-import com.sfeir.githubTrello.domain.trello.Card;
-import com.sfeir.githubTrello.domain.trello.List;
 
 import static ch.lambdaj.Lambda.*;
 

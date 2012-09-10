@@ -13,13 +13,12 @@ import static org.fest.assertions.Assertions.*;
 
 
 public class TrelloServiceTest {
-
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		service = new ExpandedTrelloService("0b2755de4a62ec8b473b6040e38ed6aaa60f8c6c358c3598bfd7721038247f45");
+		service = new ExpandedTrelloService(TRELLO_TOKEN);
 
-		List toDoList = service.getList(board, FIRST_LIST.getName());
-		List doingList = service.getList(board, SECOND_LIST.getName());
+		List toDoList = service.getList(BOARD, FIRST_LIST.getName());
+		List doingList = service.getList(BOARD, SECOND_LIST.getName());
 
 		assertThat(toDoList.getId()).isEqualTo(FIRST_LIST.getId());
 		assertThat(doingList.getId()).isEqualTo(SECOND_LIST.getId());
@@ -30,8 +29,8 @@ public class TrelloServiceTest {
 	@Test
 	public void should_have_one_card_in_second_list() {
 		service.moveCard(CARD_1, SECOND_LIST);
-		assertThat(service.getList(board, FIRST_LIST.getName()).getCards()).containsOnly(CARD_2, CARD_3);
-		assertThat(service.getList(board, SECOND_LIST.getName()).getCards()).containsOnly(CARD_1.inNewList(SECOND_LIST));
+		assertThat(service.getList(BOARD, FIRST_LIST.getName()).getCards()).containsOnly(CARD_2, CARD_3);
+		assertThat(service.getList(BOARD, SECOND_LIST.getName()).getCards()).containsOnly(CARD_1.inNewList(SECOND_LIST));
 	}
 
 	@Test
@@ -49,21 +48,23 @@ public class TrelloServiceTest {
 	}
 
 	private static ExpandedTrelloService service;
-	private static Board board = new Board("50364695312149d41b85ec68");
-	private static final List FIRST_LIST = list("50364695312149d41b85ec69", "To Do");
-	private static final List SECOND_LIST = list("50364695312149d41b85ec6a", "Doing");
-	private static final Card CARD_1 = card("Card 1", "50447bbee86d9cdc5dfe50a7", FIRST_LIST.getId(), board.getId());
-	private static final Card CARD_2 = card("Card 2", "50447bc7e86d9cdc5dfe55cb", FIRST_LIST.getId(), board.getId());
-	private static final Card CARD_3 = card("Card 3", "50447bd1e86d9cdc5dfe5c12", FIRST_LIST.getId(), board.getId());
+
+	private static final Board BOARD = new Board("504df45b6d2da1e52e77a5fa");
+	private static final String TRELLO_TOKEN = "7e8c025e357e5d3d65920111613adabc6fd21072600951a7234030a3280a3d21";
+	private static final List FIRST_LIST = list("504df45b6d2da1e52e77a5fb", "To Do");
+	private static final List SECOND_LIST = list("504df45b6d2da1e52e77a5fc", "Doing");
+	private static final Card CARD_1 = card("Card 1", "", "504df4656d2da1e52e77a9bc", FIRST_LIST.getId(), BOARD.getId());
+	private static final Card CARD_2 = card("Card 2", "", "504df4696d2da1e52e77ae2d", FIRST_LIST.getId(), BOARD.getId());
+	private static final Card CARD_3 = card("Card 3", "", "504df4706d2da1e52e77b234", FIRST_LIST.getId(), BOARD.getId());
 
 
 	private static class ExpandedTrelloService extends TrelloService {
-		public ExpandedTrelloService(String token) {
+		ExpandedTrelloService(String token) {
 			super(token);
 		}
 
 		void moveCard(Card card, List list) {
-			rest.url("/cards/%s/idList?value=%s", card.getId(), list.getId()).put();
+			restClient.url("/cards/%s/idList?value=%s", card.getId(), list.getId()).put();
 		}
 	}
 }

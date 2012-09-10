@@ -26,14 +26,24 @@ public class Card {
 		return this.name;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public Card inNewList(List newList) {
+		Card newCard = clone();
+		newCard.listId = newList.getId();
+		return newCard;
+	}
+
 	@Override
 	public String toString() {
-		return toStringHelper(this).add("id", id).add("boardId", boardId).add("listId", listId).add("name", name).toString();
+		return toStringHelper(this).add("id", id).add("boardId", boardId).add("listId", listId).add("name", name).add("description", description).toString();
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(id, boardId, listId, name);
+		return Objects.hashCode(id, boardId, listId, name, description);
 	}
 
 	@Override
@@ -46,26 +56,25 @@ public class Card {
 		}
 		if (obj instanceof Card) {
 			Card other = (Card) obj;
-			return equal(id, other.id) && equal(boardId, other.boardId) && equal(listId, other.listId) && equal(name, other.name);
+			return equal(id, other.id)
+					&& equal(boardId, other.boardId)
+					&& equal(listId, other.listId)
+					&& equal(name, other.name)
+					&& equal(description, other.description);
 		}
 		return false;
 	}
 
-
-	public Card inNewList(List newList) {
-		return cardBuilder().id(id).boardId(boardId).name(name).listId(newList.getId()).build();
+	@Override
+	protected Card clone() {
+		return cardBuilder().id(id).boardId(boardId).name(name).description(description).listId(listId).build();
 	}
 
 	public static Builder cardBuilder() {
 		return new Card.Builder();
 	}
 
-
 	public static class Builder {
-		private String id;
-		private String boardId;
-		private String listId;
-		private String name;
 
 		public Builder id(String id) {
 			this.id = id;
@@ -87,19 +96,32 @@ public class Card {
 			return this;
 		}
 
+		public Builder description(String description) {
+			this.description = description;
+			return this;
+		}
+
 		public Card build() {
 			Card card = new Card();
 			card.id = id;
 			card.boardId = boardId;
 			card.listId = listId;
 			card.name = name;
+			card.description = description;
 			return card;
 		}
+
+		private String id;
+		private String boardId;
+		private String listId;
+		private String name;
+		private String description;
 	}
 
 
 	private String id;
 	private String name;
+	@JsonProperty("desc") private String description;
 	@JsonProperty("idBoard") private String boardId;
 	@JsonProperty("idList") private String listId;
 

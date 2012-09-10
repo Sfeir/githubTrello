@@ -9,7 +9,7 @@ import static org.fest.assertions.Assertions.*;
 public class EscapeTest {
 
 	@Test
-	public void should_escape_word() {
+	public void should_suppress_weird_characters() {
 		assertThat(escape("@#${}[]")).isEmpty();
 		assertThat(escape("àéîòü")).isEqualTo("aeiou");
 		assertThat(escape("Hello World!")).isEqualTo("hello-world");

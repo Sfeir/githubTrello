@@ -6,51 +6,59 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.ImmutableMap;
+import com.sfeir.githubTrello.domain.github.Branch;
 import com.sfeir.githubTrello.domain.github.Repository;
-import com.sfeir.githubTrello.wrapper.Rest;
-import com.sfeir.githubTrello.wrapper.Rest.RestUrl;
+import com.sfeir.githubTrello.wrapper.RestClient;
 
-import static com.google.common.base.Strings.*;
 import static com.sfeir.githubTrello.wrapper.Json.*;
 import static java.lang.String.*;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class GithubService {
 
 	public GithubService(Repository repository, String token) {
 		this.repository = repository;
-		this.rest = new Rest(API_URL, format("&access_token=%s", token));
+		this.rest = new RestClient(API_URL, format("&access_token=%s", token));
+		//TODO: Bof
+		baseBranch = getBranch(repository.getBaseBranchName());
+		if (!baseBranch.exists()) {
+			logger.warn(format("Originating commit for branch %s not found", baseBranch));
+		}
 	}
 
-	public String createFeatureBranch(String branchName) {
-		Map<String, ?> input = ImmutableMap.of(
-				"ref", "refs/heads/" + branchName,
-				"sha", getBranchSha(repository.getBaseBranchName()));
+
+	public final Branch getBranch(String branchName) {
+		String branchJson = rest.url("/repos/%s/%s/branches/%s", repository.getUser(), repository.getName(), branchName).get();
+		return fromJsonToObject(branchJson, Branch.class);
+	}
+
+	public final String createFeatureBranch(String branchName) {
+		Map<String, String> input =
+				ImmutableMap.of("ref", "refs/heads/" + branchName, "sha", baseBranch.getCommit().getSha());
 		String branch = rest.url("/repos/%s/%s/git/refs", repository.getUser(), repository.getName()).post(input);
 		logger.info(format("Feature branch %s created with output %s", branchName, branch));
 		return branch;
 	}
 
-	protected RestUrl getRestUrlForBranches(String branchName) {
-		return rest.url("/repos/%s/%s/git/refs/heads/%s", repository.getUser(), repository.getName(), nullToEmpty(branchName));
-	}
-
-	protected String getBranch(String branchName) {
-		return getRestUrlForBranches(branchName).get();
-	}
-
-	private String getBranchSha(String baseBranchName) {
-		if (baseBranchSha == null) {
-			baseBranchSha = extractValue(getBranch(baseBranchName), "object", "sha");
-			if (isNullOrEmpty(baseBranchSha)) {
-				logger.warn(format("Originating commit for branch %s not found", baseBranchName));
-			}
+	public final String createPullRequest(String title, String body, Branch branch) {
+		String head = format("%s:%s", repository.getUser(), branch.getName());
+		Map<String, String> input =
+				ImmutableMap.of("title", title, "body", body, "head", head, "base", baseBranch.getName());
+		String pullRequest = rest.url("/repos/%s/%s/pulls", repository.getUser(), repository.getName()).post(input);
+		if (isNotEmpty(pullRequest)) {
+			logger.info(format("Pull request for branch %s created, output %s", branch.getName(), pullRequest));
 		}
-		return baseBranchSha;
+		return pullRequest;
 	}
 
-	protected Rest rest;
+	public final boolean hasCommitsOnBranch(Branch branch) {
+		return !baseBranch.getCommit().getSha().equals(branch.getCommit().getSha());
+	}
+
+	protected RestClient rest;
 	protected Repository repository;
-	private String baseBranchSha;
+	private Branch baseBranch;
 	private static final Log logger = LogFactory.getLog(GithubService.class);
 	private static final String API_URL = "https://api.github.com";
+
 }

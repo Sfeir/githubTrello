@@ -36,12 +36,14 @@ public class List {
 	}
 
 	public List withNewCardsInJson(String newCardsInJson) {
-		return listBuilder()
-				.id(this.id)
-				.name(this.name)
-				.boardId(this.boardId)
-				.cardsInJson(newCardsInJson)
-				.build();
+		List newList = clone();
+		newList.cardsInJson = newCardsInJson;
+		return newList;
+	}
+
+	@Override
+	protected List clone() {
+		return listBuilder().id(id).name(name).boardId(boardId).cardsInJson(cardsInJson).build();
 	}
 
 	public static Builder listBuilder() {

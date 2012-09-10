@@ -1,11 +1,13 @@
-package com.sfeir.githubTrello;
+package com.sfeir.githubTrello.domain.trello;
 
 import java.util.Collection;
 
 import org.junit.Test;
 
-import static com.sfeir.githubTrello.BoardWatcher.*;
+import com.sfeir.githubTrello.domain.trello.BoardWatcher;
+
 import static com.sfeir.githubTrello.Tools.*;
+import static com.sfeir.githubTrello.domain.trello.BoardWatcher.*;
 import static org.fest.assertions.Assertions.*;
 
 public class BoardWatcherTest {

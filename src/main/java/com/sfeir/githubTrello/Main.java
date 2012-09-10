@@ -3,27 +3,26 @@ package com.sfeir.githubTrello;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import com.sfeir.githubTrello.domain.github.Branch;
 import com.sfeir.githubTrello.domain.github.Repository;
 import com.sfeir.githubTrello.domain.trello.Board;
+import com.sfeir.githubTrello.domain.trello.BoardWatcher;
 import com.sfeir.githubTrello.domain.trello.Card;
 import com.sfeir.githubTrello.domain.trello.List;
 import com.sfeir.githubTrello.service.GithubService;
 import com.sfeir.githubTrello.service.TrelloService;
 
 import static com.google.common.base.Preconditions.*;
-import static com.sfeir.githubTrello.BoardWatcher.*;
 import static com.sfeir.githubTrello.TrelloDatabase.*;
 import static com.sfeir.githubTrello.domain.github.Repository.*;
+import static com.sfeir.githubTrello.domain.trello.BoardWatcher.*;
 import static com.sfeir.githubTrello.domain.trello.List.*;
 import static com.sfeir.githubTrello.wrapper.Escape.*;
 import static java.lang.String.*;
 
 public final class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws SQLException, IOException {
 
 		String trelloToken = get("trello.token");
 		String trelloCsvDatabasePath = get("trello.csv.database");
@@ -54,9 +53,6 @@ public final class Main {
 			database.saveList(newToDoList);
 			database.saveList(newDoingList);
 		}
-		catch (SQLException | IOException e) {
-			logger.error(e, e);
-		}
 
 		BoardWatcher toDoDoingWatcher = boardWatcherBuilder()
 				.oldStartList(oldToDoList)
@@ -75,8 +71,19 @@ public final class Main {
 
 		for (String cardId : toDoDoingWatcher.getMovedCards()) {
 			Card card = trelloService.getCard(cardId);
-			githubService.createFeatureBranch(escape(format("%s_%s", card.getName(), cardId)));
+			githubService.createFeatureBranch(asBranchName(card));
 		}
+
+		for (Card card : newDoingList.getCards()) {
+			Branch featureBranch = githubService.getBranch(asBranchName(card));
+			if (featureBranch.exists() && githubService.hasCommitsOnBranch(featureBranch)) {
+				githubService.createPullRequest(card.getName(), card.getDescription(), featureBranch);
+			}
+		}
+	}
+
+	private static String asBranchName(Card card) {
+		return escape(format("%s_%s", card.getName(), card.getId()));
 	}
 
 	private static String get(String property) {
@@ -84,6 +91,4 @@ public final class Main {
 	}
 
 	private Main() {}
-
-	private static final Log logger = LogFactory.getLog(Main.class);
 }
