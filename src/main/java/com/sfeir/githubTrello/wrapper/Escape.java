@@ -5,10 +5,7 @@ import java.text.Normalizer;
 public class Escape {
 
 	public static String escape(String word) {
-		return stripAccents(word)
-				.replaceAll("\\s+", "-")
-				.replaceAll("([^\\w-])", "")
-				.toLowerCase();
+		return stripAccents(word).replaceAll("\\s+", "-").replaceAll("([^\\w-])", "").toLowerCase();
 	}
 
 	private static String stripAccents(String word) {

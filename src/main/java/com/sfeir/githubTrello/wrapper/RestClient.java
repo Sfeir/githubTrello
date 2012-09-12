@@ -56,7 +56,7 @@ public class RestClient {
 		private String getResponseEntity(ClientResponse clientResponse) {
 			if (clientResponse.getClientResponseStatus() == null ||
 					clientResponse.getClientResponseStatus().getFamily() != Family.SUCCESSFUL) {
-				logger.warn("Failed : HTTP error code : " + clientResponse.getStatus() + "\nUrl: " + url);
+				logger.warn(format("Failed : HTTP error code : %s\nUrl: %s", clientResponse.getStatus(), url), new Exception());
 				return "";
 			}
 			return clientResponse.getEntity(String.class);

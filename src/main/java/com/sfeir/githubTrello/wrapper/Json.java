@@ -70,19 +70,13 @@ public final class Json {
 		String value = matcher.group(3);
 
 		Iterator<JsonNode> elements = node.getElements();
-		while (elements.hasNext())
-		{
+		while (elements.hasNext()) {
 			JsonNode element = elements.next();
 			if (value.equals(element.get(key).getTextValue())) {
 				return element.get(actualAttribute);
 			}
 		}
 		return node;
-
-
-
-		//		JsonNode actualNode = selectUnique(nodeElements, having(on(JsonNode.class).get(key).getTextValue().equals(value)));
-		//		return actualNode.get(actualAttribute);
 	}
 
 	private Json() {}

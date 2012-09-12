@@ -18,7 +18,8 @@ import static java.lang.String.*;
 import static org.apache.commons.dbutils.DbUtils.*;
 
 public final class TrelloDatabase implements AutoCloseable {
-
+	//NOTE: http://stackoverflow.com/questions/9812453/trello-api-determine-when-a-card-changed-lists
+	//An entire database may or may not be still necessary after that, storing only the date of the previous call and comparing it to the current one may be enough
 
 
 	private void init(String name) throws SQLException, IOException {

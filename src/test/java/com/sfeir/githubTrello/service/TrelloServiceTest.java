@@ -9,6 +9,7 @@ import com.sfeir.githubTrello.domain.trello.Card;
 import com.sfeir.githubTrello.domain.trello.List;
 
 import static com.sfeir.githubTrello.Tools.*;
+import static com.sfeir.githubTrello.domain.trello.Card.*;
 import static org.fest.assertions.Assertions.*;
 
 
@@ -53,10 +54,34 @@ public class TrelloServiceTest {
 	private static final String TRELLO_TOKEN = "7e8c025e357e5d3d65920111613adabc6fd21072600951a7234030a3280a3d21";
 	private static final List FIRST_LIST = list("504df45b6d2da1e52e77a5fb", "To Do");
 	private static final List SECOND_LIST = list("504df45b6d2da1e52e77a5fc", "Doing");
-	private static final Card CARD_1 = card("Card 1", "", "504df4656d2da1e52e77a9bc", FIRST_LIST.getId(), BOARD.getId());
-	private static final Card CARD_2 = card("Card 2", "", "504df4696d2da1e52e77ae2d", FIRST_LIST.getId(), BOARD.getId());
-	private static final Card CARD_3 = card("Card 3", "", "504df4706d2da1e52e77b234", FIRST_LIST.getId(), BOARD.getId());
+	private static final Card CARD_1, CARD_2, CARD_3;
 
+	static {
+		CARD_1 = cardBuilder()
+				.name("Card 1")
+				.description("Description 1")
+				.id("504df4656d2da1e52e77a9bc")
+				.listId(FIRST_LIST.getId())
+				.boardId(BOARD.getId())
+				.url("https://trello.com/card/card-1/504df45b6d2da1e52e77a5fa/1")
+				.build();
+		CARD_2 = cardBuilder()
+				.name("Card 2")
+				.description("Description 2")
+				.id("504df4696d2da1e52e77ae2d")
+				.listId(FIRST_LIST.getId())
+				.boardId(BOARD.getId())
+				.url("https://trello.com/card/card-2/504df45b6d2da1e52e77a5fa/2")
+				.build();
+		CARD_3 = cardBuilder()
+				.name("Card 3")
+				.description("Description 3")
+				.id("504df4706d2da1e52e77b234")
+				.listId(FIRST_LIST.getId())
+				.boardId(BOARD.getId())
+				.url("https://trello.com/card/card-3/504df45b6d2da1e52e77a5fa/3")
+				.build();
+	}
 
 	private static class ExpandedTrelloService extends TrelloService {
 		ExpandedTrelloService(String token) {

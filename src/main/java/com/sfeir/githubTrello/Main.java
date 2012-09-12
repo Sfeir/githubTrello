@@ -2,8 +2,10 @@ package com.sfeir.githubTrello;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import com.sfeir.githubTrello.domain.github.Branch;
+import com.sfeir.githubTrello.domain.github.PullRequest;
 import com.sfeir.githubTrello.domain.github.Repository;
 import com.sfeir.githubTrello.domain.trello.Board;
 import com.sfeir.githubTrello.domain.trello.BoardWatcher;
@@ -22,17 +24,20 @@ import static java.lang.String.*;
 
 public final class Main {
 
-	public static void main(String[] args) throws SQLException, IOException {
+	public static void main(String[] args) throws IOException, SQLException {
 
-		String trelloToken = get("trello.token");
-		String trelloCsvDatabasePath = get("trello.csv.database");
-		String trelloBoardId = get("trello.board-id");
-		String trelloToDoListName = get("trello.to-do-list.name");
-		String trelloDoingListName = get("trello.doing-list.name");
-		String githubToken = get("github.token");
-		String githubUser = get("github.user");
-		String githubRepositoryName = get("github.repo");
-		String githubDevelopBranch = get("github.develop-branch");
+		Properties properties = new Properties();
+		properties.load(Main.class.getResourceAsStream(args[0]));
+
+		String trelloToken = get("trello.token", properties);
+		String trelloCsvDatabasePath = get("trello.csv.database", properties);
+		String trelloBoardId = get("trello.board-id", properties);
+		String trelloToDoListName = get("trello.to-do-list.name", properties);
+		String trelloDoingListName = get("trello.doing-list.name", properties);
+		String githubToken = get("github.token", properties);
+		String githubUser = get("github.user", properties);
+		String githubRepositoryName = get("github.repo", properties);
+		String githubDevelopBranch = get("github.develop-branch", properties);
 
 		Board board = new Board(trelloBoardId);
 
@@ -76,18 +81,26 @@ public final class Main {
 
 		for (Card card : newDoingList.getCards()) {
 			Branch featureBranch = githubService.getBranch(asBranchName(card));
-			if (featureBranch.exists() && githubService.hasCommitsOnBranch(featureBranch)) {
-				githubService.createPullRequest(card.getName(), card.getDescription(), featureBranch);
+			if (featureBranch.exists()
+					&& githubService.hasCommitsOnBranch(featureBranch)
+					&& githubService.hasNoPullRequestForBranch(featureBranch)) {
+				PullRequest pullRequest = githubService.createPullRequest(card.getName(), card.getDescription(), featureBranch);
+				githubService.updatePullRequestDescription(pullRequest, appendUrlToDescription(pullRequest.getDescription(), card.getUrl()));
+				//trelloService.updateCardDescription(card, appendUrlToDescription(card.getDescription(), pullRequest.getHtmlUrl()));
 			}
 		}
+	}
+
+	private static String appendUrlToDescription(String description, String url) {
+		return format("%s\n[%s](%<)", description, url);
 	}
 
 	private static String asBranchName(Card card) {
 		return escape(format("%s_%s", card.getName(), card.getId()));
 	}
 
-	private static String get(String property) {
-		return checkNotNull(System.getProperty(property), "Missing property " + property);
+	private static String get(String key, Properties properties) {
+		return checkNotNull(properties.get(key), "Missing property " + key).toString();
 	}
 
 	private Main() {}

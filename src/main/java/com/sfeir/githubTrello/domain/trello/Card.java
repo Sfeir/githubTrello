@@ -30,6 +30,10 @@ public class Card {
 		return description;
 	}
 
+	public String getUrl() {
+		return url;
+	}
+
 	public Card inNewList(List newList) {
 		Card newCard = clone();
 		newCard.listId = newList.getId();
@@ -38,12 +42,18 @@ public class Card {
 
 	@Override
 	public String toString() {
-		return toStringHelper(this).add("id", id).add("boardId", boardId).add("listId", listId).add("name", name).add("description", description).toString();
+		return toStringHelper(this)
+				.add("id", id)
+				.add("boardId", boardId)
+				.add("listId", listId)
+				.add("name", name)
+				.add("description", description)
+				.add("url", url).toString();
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(id, boardId, listId, name, description);
+		return Objects.hashCode(id, boardId, listId, name, description, url);
 	}
 
 	@Override
@@ -60,14 +70,15 @@ public class Card {
 					&& equal(boardId, other.boardId)
 					&& equal(listId, other.listId)
 					&& equal(name, other.name)
-					&& equal(description, other.description);
+					&& equal(description, other.description)
+					&& equal(url, other.url);
 		}
 		return false;
 	}
 
 	@Override
 	protected Card clone() {
-		return cardBuilder().id(id).boardId(boardId).name(name).description(description).listId(listId).build();
+		return cardBuilder().id(id).boardId(boardId).name(name).description(description).listId(listId).url(url).build();
 	}
 
 	public static Builder cardBuilder() {
@@ -101,6 +112,11 @@ public class Card {
 			return this;
 		}
 
+		public Builder url(String url) {
+			this.url = url;
+			return this;
+		}
+
 		public Card build() {
 			Card card = new Card();
 			card.id = id;
@@ -108,6 +124,7 @@ public class Card {
 			card.listId = listId;
 			card.name = name;
 			card.description = description;
+			card.url = url;
 			return card;
 		}
 
@@ -116,6 +133,7 @@ public class Card {
 		private String listId;
 		private String name;
 		private String description;
+		private String url;
 	}
 
 
@@ -124,5 +142,5 @@ public class Card {
 	@JsonProperty("desc") private String description;
 	@JsonProperty("idBoard") private String boardId;
 	@JsonProperty("idList") private String listId;
-
+	private String url;
 }

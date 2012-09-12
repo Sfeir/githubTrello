@@ -14,10 +14,6 @@ public class Tools {
 		return listBuilder().id(listId).name(name).cardsInJson(fromObjectToJson(asList(cards))).build();
 	}
 
-	public static Card card(String name, String description, String cardId, String listId, String boardId) {
-		return cardBuilder().name(name).description(description).id(cardId).listId(listId).boardId(boardId).build();
-	}
-
 	public static Card card(String cardId) {
 		return cardBuilder().id(cardId).build();
 	}

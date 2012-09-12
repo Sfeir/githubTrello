@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import com.sfeir.githubTrello.domain.github.Branch;
 import com.sfeir.githubTrello.domain.github.Branch.Commit;
+import com.sfeir.githubTrello.domain.github.PullRequest;
 import com.sfeir.githubTrello.domain.github.Repository;
 
 import static com.google.common.collect.ImmutableMap.*;
@@ -17,8 +18,6 @@ import static com.google.common.collect.Lists.*;
 
 import static com.sfeir.githubTrello.domain.github.Repository.*;
 import static com.sfeir.githubTrello.wrapper.Json.*;
-import static java.lang.String.*;
-import static java.lang.System.*;
 import static org.fest.assertions.Assertions.*;
 
 public class GithubServiceTest {
@@ -32,56 +31,58 @@ public class GithubServiceTest {
 				.build();
 		service = new ExpandedGithubService(githubRepository, GITHUB_TOKEN);
 
-		service.deleteBranch(service.getBranch(TEMP_BRANCH));
 		assertThat(service.getBranch(MASTER_BRANCH).exists()).isTrue();
 		assertThat(service.getBranch(DEVELOP_BRANCH).exists()).isTrue();
 		assertThat(service.getAllBranches()).hasSize(2);
+		assertThat(service.getOpenedPullRequests()).isEmpty();
 	}
 
 	@Test
-	public void should_create_one_branch() {
-		service.createFeatureBranch(TEMP_BRANCH);
-		assertThat(service.getBranch(TEMP_BRANCH).getName()).isEqualTo(TEMP_BRANCH);
+	public void should_create_a_feature_branch() {
+		Branch featureBranch = service.createFeatureBranch(FEATURE_BRANCH);
+		assertThat(featureBranch.getName()).isEqualTo(FEATURE_BRANCH);
+		assertThat(service.hasCommitsOnBranch(featureBranch)).isFalse();
+		assertThat(service.hasNoPullRequestForBranch(featureBranch)).isTrue();
 	}
 
-	//	@Test
-	public void should_not_create_two_identical_pull_requests() {
-		String branchName = TEMP_BRANCH + nanoTime();
-		service.createFeatureBranch(branchName);
+	@Test
+	public void should_create_only_one_pull_request_and_update_its_description_correctly() {
+		Branch branch = service.createFeatureBranch(PULL_REQUEST);
+		String commitResult = service.commitFile(branch, "README.md", "Hello World", "Commit for branch: " + PULL_REQUEST);
+		assertThat(commitResult).isNotEmpty();
 
-		Branch branch = service.getBranch(branchName);
-		Commit latestCommit = branch.getCommit();
+		branch = service.getBranch(PULL_REQUEST);
+		assertThat(service.hasCommitsOnBranch(branch)).isTrue();
 
-		service.commitOneFile(latestCommit, "README.md", "Hello World!", "Dummy commit for branch" + branchName);
+		String pullRequestName = branch.getName() + "-" + System.nanoTime();
+		PullRequest pullRequest = service.createPullRequest(pullRequestName, "Nothing", branch);
+		assertThat(pullRequest.isValid()).isTrue();
+		assertThat(pullRequest.getDescription()).isEqualTo("Nothing");
+		assertThat(service.hasNoPullRequestForBranch(branch)).isFalse();
 
-		String firstTry = service.createPullRequest(branch.getName(), latestCommit.getSha(), branch);
-		String secondTry = service.createPullRequest(branch.getName(), latestCommit.getSha(), branch);
+		PullRequest identicalPullRequest = service.createPullRequest(pullRequestName, "Nothing", branch);
+		assertThat(identicalPullRequest.isValid()).isFalse();
 
-
-		//		assertThat(firstTry).isNotEmpty();
-		//		assertThat(secondTry).isEmpty();
-
-
+		PullRequest updatedPullRequest = service.updatePullRequestDescription(pullRequest, "Something");
+		assertThat(updatedPullRequest.getDescription()).isEqualTo("Something");
 	}
+
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		for (Branch branch : service.getAllBranches()) {
-			switch (branch.getName()) {
-			case MASTER_BRANCH:
-				break;
-			case DEVELOP_BRANCH:
-				break;
-			default:
-				service.deleteBranch(branch);
-			}
+			service.deleteBranch(branch);
+		}
+		for (PullRequest pullRequest : service.getOpenedPullRequests()) {
+			service.closePullRequest(pullRequest);
 		}
 	}
 
 	private static Repository githubRepository;
 	private static ExpandedGithubService service;
 
-	private static final String TEMP_BRANCH = "temp-branch";
+	private static final String FEATURE_BRANCH = "feature-branch";
+	private static final String PULL_REQUEST = "pull-request";
 	private static final String MASTER_BRANCH = "master";
 	private static final String DEVELOP_BRANCH = "develop";
 	private static final String GITHUB_REPOSITORY_NAME = "dummy";
@@ -95,32 +96,33 @@ public class GithubServiceTest {
 		}
 
 		Collection<Branch> getAllBranches() {
-			return fromJsonToObjects(rest.url("/repos/%s/%s/branches", repository.getUser(), repository.getName()).get(), Branch.class);
+			return fromJsonToObjects(restClient.url("/repos/%s/%s/git/refs", user, repositoryName).get(), Branch.class);
 		}
 
 		String deleteBranch(Branch branch) {
-			return rest.url("/repos/%s/%s/git/refs/heads/%s", repository.getUser(), repository.getName(), branch.getName()).delete();
+			return restClient.url("/repos/%s/%s/git/refs/heads/%s", user, repositoryName, branch.getName()).delete();
+		}
+
+		String closePullRequest(PullRequest pullRequest) {
+			return restClient.url("/repos/%s/%s/pulls/%s", user, repositoryName, pullRequest.getId()).post(of("state", "closed"));
 		}
 
 		@SuppressWarnings("unchecked")
-		String commitOneFile(Commit parentCommit, String filename, String newContent, String commitMessage) {//Cf http://developer.github.com/v3/git/
+		String commitFile(Branch branch, String filename, String newContent, String commitMessage) {
+			//See: http://developer.github.com/v3/git/
+			Commit commit = branch.getCommit();
+			String commitInfo = restClient.url(commit.getUrl()).get();
 
-			String commitInfo = rest.url(parentCommit.getUrl()).get();
-			String treeInfo = rest.url(extractValue(commitInfo, "commit", "tree", "url")).get();
+			Map<String, ?> newTreeInput = of("base_tree", extractValue(commitInfo, "tree", "sha"),
+					"tree", newArrayList(of("path", filename, "mode", "100644", "type", "blob", "content", newContent)));
+			String newTreeInfo = restClient.url("/repos/%s/%s/git/trees", user, repositoryName).post(newTreeInput);
 
-			Map<String, String> newBlob = of("content", newContent, "encoding", "utf-8");
-			String blobInfo = rest.url("/repos/%s/%s/git/blobs", repository.getUser(), repository.getName()).post(newBlob);
+			Map<String, ?> newCommitInput = of("message", commitMessage, "tree", extractValue(newTreeInfo, "sha"), "parents",
+					newArrayList(commit.getSha()));
+			String newCommitInfo = restClient.url("/repos/%s/%s/git/commits", user, repositoryName).post(newCommitInput);
 
-			Map<String, ?> newTree = of("base_tree", extractValue(commitInfo, "commit", "tree", "sha"),
-					"tree", newArrayList(of(
-							"path", filename,
-							"mode", extractValue(treeInfo, "tree", format("mode[path=%s]", filename)),
-							"type", extractValue(treeInfo, "tree", format("type[path=%s]", filename)),
-							"sha", extractValue(blobInfo, "sha"))));
-			String newTreeInfo = rest.url("/repos/%s/%s/git/trees", repository.getUser(), repository.getName()).post(newTree);
-
-			Map<String, ?> newCommit = of("message", commitMessage, "tree", extractValue(newTreeInfo, "sha"), "parents", newArrayList(parentCommit.getSha()));
-			return rest.url("/repos/%s/%s/git/commit", repository.getUser(), repository.getName()).post(newCommit);
+			Map<String, ?> updatedBranchInput = of("sha", extractValue(newCommitInfo, "sha"), "force", true);
+			return restClient.url("/repos/%s/%s/git/refs/heads/%s", user, repositoryName, branch.getName()).post(updatedBranchInput);
 		}
 	}
 }

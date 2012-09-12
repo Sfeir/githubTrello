@@ -1,12 +1,13 @@
 package com.sfeir.githubTrello.domain.github;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Branch {
 
 	public String getName() {
-		return name;
+		return ref.replace("refs/heads/", "");
 	}
 
 	public Commit getCommit() {
@@ -14,13 +15,13 @@ public class Branch {
 	}
 
 	public boolean exists() {
-		return name != null && commit != null;
+		return ref != null && commit != null;
 	}
 
 	public Branch() {}
 
-	private Commit commit;
-	private String name;
+	@JsonProperty("object") private Commit commit;
+	@JsonProperty("ref") private String ref;
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public class Commit {

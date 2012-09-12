@@ -7,6 +7,7 @@ import com.sfeir.githubTrello.domain.trello.Card;
 import com.sfeir.githubTrello.domain.trello.List;
 import com.sfeir.githubTrello.wrapper.RestClient;
 
+import static com.sfeir.githubTrello.domain.trello.Card.*;
 import static com.sfeir.githubTrello.domain.trello.List.*;
 import static com.sfeir.githubTrello.wrapper.Json.*;
 import static java.lang.String.*;
@@ -30,6 +31,10 @@ public class TrelloService {
 			}
 		}
 		return listBuilder().build();
+	}
+
+	public final Card updateCardDescription(Card card, String newDescription) {
+		return cardBuilder().build();
 	}
 
 	private Collection<List> getListsFromBoard(Board board) {

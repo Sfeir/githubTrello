@@ -30,14 +30,14 @@
 			<version>1.4</version>
 		</dependency>
 		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.9.5-rc1</version>
-		</dependency>
-		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-client</artifactId>
 			<version>1.13</version>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.3.168</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -48,11 +48,6 @@
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
 			<version>3.2.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>1.3.168</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-dbutils</groupId>
@@ -86,28 +81,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<archive>
-						<manifest>
-							<mainClass>com.sfeir.githubTrello.Main</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-				<executions>
-					<execution>
-						<id>make-my-jar-with-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12.2</version>
 				<configuration>
@@ -119,8 +92,36 @@
 				<artifactId>sonar-maven-plugin</artifactId>
 				<version>2.0</version>
 			</plugin>
+			<plugin>
+        		<groupId>org.codehaus.mojo</groupId>
+     			<artifactId>appassembler-maven-plugin</artifactId>
+        		<version>1.2.2</version>
+        		<executions>
+          			<execution>
+            			<phase>package</phase>
+            			<goals>
+              				<goal>assemble</goal>
+            			</goals>
+          			</execution>
+       			</executions>
+        		<configuration>
+					<configurationDirectory>conf</configurationDirectory>
+					<copyConfigurationDirectory>true</copyConfigurationDirectory>
+					<includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+        			<commandLineArguments>
+                		<commandLineArgument>github-trello-sample.properties</commandLineArgument>
+					</commandLineArguments>
+          			<programs>
+            			<program>
+              				<mainClass>com.sfeir.githubTrello.Main</mainClass>
+              				<name>github-trello</name>
+            			</program>
+          			</programs>
+          			<platforms>
+         				<platform>all</platform>
+          			</platforms>
+       			</configuration>
+      		</plugin>
 		</plugins>
 	</build>
-
-
 </project>
