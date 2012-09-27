@@ -3,7 +3,9 @@ package com.sfeir.githubTrello.service;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+import com.sfeir.githubTrello.ApiTests;
 import com.sfeir.githubTrello.domain.trello.Board;
 import com.sfeir.githubTrello.domain.trello.Card;
 import com.sfeir.githubTrello.domain.trello.List;
@@ -12,7 +14,7 @@ import static com.sfeir.githubTrello.Tools.*;
 import static com.sfeir.githubTrello.domain.trello.Card.*;
 import static org.fest.assertions.Assertions.*;
 
-
+@Category(ApiTests.class)
 public class TrelloServiceTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {

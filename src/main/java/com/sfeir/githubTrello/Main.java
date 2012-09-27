@@ -1,5 +1,7 @@
 package com.sfeir.githubTrello;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -27,24 +29,24 @@ public final class Main {
 	public static void main(String[] args) throws IOException, SQLException {
 
 		Properties properties = new Properties();
-		properties.load(Main.class.getResourceAsStream(args[0]));
+		properties.load(new FileReader(new File(args[0])));
 
 		String trelloToken = get("trello.token", properties);
 		String trelloCsvDatabasePath = get("trello.csv.database", properties);
 		String trelloBoardId = get("trello.board-id", properties);
-		String trelloToDoListName = get("trello.to-do-list.name", properties);
-		String trelloDoingListName = get("trello.doing-list.name", properties);
+		String trelloBacklogList = get("trello.backlog-list", properties);
+		String trelloInProgressList = get("trello.in-progress-list", properties);
 		String githubToken = get("github.token", properties);
 		String githubUser = get("github.user", properties);
 		String githubRepositoryName = get("github.repo", properties);
-		String githubDevelopBranch = get("github.develop-branch", properties);
+		String githubIntegrationBranch = get("github.integration-branch", properties);
 
 		Board board = new Board(trelloBoardId);
 
 		TrelloService trelloService = new TrelloService(trelloToken);
 
-		List newToDoList = trelloService.getList(board, trelloToDoListName);
-		List newDoingList = trelloService.getList(board, trelloDoingListName);
+		List newToDoList = trelloService.getList(board, trelloBacklogList);
+		List newDoingList = trelloService.getList(board, trelloInProgressList);
 		List oldToDoList = listBuilder().build();
 		List oldDoingList = listBuilder().build();
 
@@ -67,7 +69,7 @@ public final class Main {
 				.build();
 
 		Repository githubRepository = repositoryBuilder()
-				.baseBranch(githubDevelopBranch)
+				.baseBranch(githubIntegrationBranch)
 				.user(githubUser)
 				.name(githubRepositoryName)
 				.build();
@@ -82,17 +84,21 @@ public final class Main {
 		for (Card card : newDoingList.getCards()) {
 			Branch featureBranch = githubService.getBranch(asBranchName(card));
 			if (featureBranch.exists()
-					&& githubService.hasCommitsOnBranch(featureBranch)
+					&& githubService.hasCommitsOnFeatureBranch(featureBranch)
 					&& githubService.hasNoPullRequestForBranch(featureBranch)) {
 				PullRequest pullRequest = githubService.createPullRequest(card.getName(), card.getDescription(), featureBranch);
-				githubService.updatePullRequestDescription(pullRequest, appendUrlToDescription(pullRequest.getDescription(), card.getUrl()));
-				//trelloService.updateCardDescription(card, appendUrlToDescription(card.getDescription(), pullRequest.getHtmlUrl()));
+				githubService.updatePullRequestDescription(pullRequest, appendToDescription(pullRequest.getDescription(), markdownUrl(card.getUrl())));
+				//trelloService.updateCardDescription(card, appendToDescription(card.getDescription(), markdownUrl(pullRequest.getHtmlUrl())));
 			}
 		}
 	}
 
-	private static String appendUrlToDescription(String description, String url) {
-		return format("%s\n[%s](%<)", description, url);
+	private static String appendToDescription(String description, String url) {
+		return format("%s\nSee: %s", description, url);
+	}
+
+	private static String markdownUrl(String url) {
+		return format("[%s](%<s)", url);
 	}
 
 	private static String asBranchName(Card card) {

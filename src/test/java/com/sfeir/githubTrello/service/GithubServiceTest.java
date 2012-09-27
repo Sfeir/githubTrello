@@ -6,7 +6,9 @@ import java.util.Map;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+import com.sfeir.githubTrello.ApiTests;
 import com.sfeir.githubTrello.domain.github.Branch;
 import com.sfeir.githubTrello.domain.github.Branch.Commit;
 import com.sfeir.githubTrello.domain.github.PullRequest;
@@ -20,6 +22,7 @@ import static com.sfeir.githubTrello.domain.github.Repository.*;
 import static com.sfeir.githubTrello.wrapper.Json.*;
 import static org.fest.assertions.Assertions.*;
 
+@Category(ApiTests.class)
 public class GithubServiceTest {
 
 	@BeforeClass
@@ -41,7 +44,7 @@ public class GithubServiceTest {
 	public void should_create_a_feature_branch() {
 		Branch featureBranch = service.createFeatureBranch(FEATURE_BRANCH);
 		assertThat(featureBranch.getName()).isEqualTo(FEATURE_BRANCH);
-		assertThat(service.hasCommitsOnBranch(featureBranch)).isFalse();
+		assertThat(service.hasCommitsOnFeatureBranch(featureBranch)).isFalse();
 		assertThat(service.hasNoPullRequestForBranch(featureBranch)).isTrue();
 	}
 
@@ -52,7 +55,7 @@ public class GithubServiceTest {
 		assertThat(commitResult).isNotEmpty();
 
 		branch = service.getBranch(PULL_REQUEST);
-		assertThat(service.hasCommitsOnBranch(branch)).isTrue();
+		assertThat(service.hasCommitsOnFeatureBranch(branch)).isTrue();
 
 		String pullRequestName = branch.getName() + "-" + System.nanoTime();
 		PullRequest pullRequest = service.createPullRequest(pullRequestName, "Nothing", branch);
@@ -62,6 +65,9 @@ public class GithubServiceTest {
 
 		PullRequest identicalPullRequest = service.createPullRequest(pullRequestName, "Nothing", branch);
 		assertThat(identicalPullRequest.isValid()).isFalse();
+
+		PullRequest pullRequestOnSameBranchWithDifferentName = service.createPullRequest(pullRequestName + " but different", "Nothing", branch);
+		assertThat(pullRequestOnSameBranchWithDifferentName.isValid()).isFalse();
 
 		PullRequest updatedPullRequest = service.updatePullRequestDescription(pullRequest, "Something");
 		assertThat(updatedPullRequest.getDescription()).isEqualTo("Something");
@@ -85,10 +91,9 @@ public class GithubServiceTest {
 	private static final String PULL_REQUEST = "pull-request";
 	private static final String MASTER_BRANCH = "master";
 	private static final String DEVELOP_BRANCH = "develop";
-	private static final String GITHUB_REPOSITORY_NAME = "dummy";
+	private static final String GITHUB_REPOSITORY_NAME = "test";
 	private static final String GITHUB_USER = "GithubTrello";
 	private static final String GITHUB_TOKEN = "eb7e0c3f46b3a3d366acf46d3d4f61989793c370";
-
 
 	private static class ExpandedGithubService extends GithubService {
 		ExpandedGithubService(Repository repository, String token) {
@@ -109,7 +114,7 @@ public class GithubServiceTest {
 
 		@SuppressWarnings("unchecked")
 		String commitFile(Branch branch, String filename, String newContent, String commitMessage) {
-			//See: http://developer.github.com/v3/git/
+			//See: http://developer.github.com/v3/git/ or https://gist.github.com/2935203
 			Commit commit = branch.getCommit();
 			String commitInfo = restClient.url(commit.getUrl()).get();
 

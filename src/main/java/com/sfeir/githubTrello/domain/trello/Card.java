@@ -35,9 +35,7 @@ public class Card {
 	}
 
 	public Card inNewList(List newList) {
-		Card newCard = clone();
-		newCard.listId = newList.getId();
-		return newCard;
+		return cardBuilder().id(id).boardId(boardId).name(name).description(description).listId(newList.getId()).url(url).build();
 	}
 
 	@Override
@@ -76,10 +74,6 @@ public class Card {
 		return false;
 	}
 
-	@Override
-	protected Card clone() {
-		return cardBuilder().id(id).boardId(boardId).name(name).description(description).listId(listId).url(url).build();
-	}
 
 	public static Builder cardBuilder() {
 		return new Card.Builder();

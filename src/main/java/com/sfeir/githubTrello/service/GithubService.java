@@ -1,6 +1,7 @@
 package com.sfeir.githubTrello.service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -25,7 +26,6 @@ public class GithubService {
 		this.user = repository.getUser();
 		this.repositoryName = repository.getName();
 
-		//TODO (Mr.MEDDAH at Sep 12, 2012): Bof
 		baseBranch = getBranch(repository.getBaseBranchName());
 		if (!baseBranch.exists()) {
 			logger.warn(format("Originating commit for branch %s not found", baseBranch));
@@ -40,7 +40,9 @@ public class GithubService {
 	public final Branch createFeatureBranch(String branchName) {
 		Map<String, String> input = of("ref", "refs/heads/" + branchName, "sha", baseBranch.getCommit().getSha());
 		String branch = restClient.url("/repos/%s/%s/git/refs", user, repositoryName).post(input);
-		logger.info(format("Feature branch %s created with output %s", branchName, branch));
+		if (isNotEmpty(branch)) {
+			logger.info(format("Feature branch %s created with output %s", branchName, branch));
+		}
 		return fromJsonToObject(branch, Branch.class);
 	}
 
@@ -59,12 +61,14 @@ public class GithubService {
 		return fromJsonToObject(updatedPullRequest, PullRequest.class);
 	}
 
-	public final boolean hasCommitsOnBranch(Branch branch) {
+	public final boolean hasCommitsOnFeatureBranch(Branch branch) {
 		return !baseBranch.getCommit().getSha().equals(branch.getCommit().getSha());
 	}
 
 	public final boolean hasNoPullRequestForBranch(Branch featureBranch) {
-		return select(getOpenedPullRequests(), having(on(PullRequest.class).getHead().getName(), equalTo(featureBranch.getName()))).isEmpty();
+		List<PullRequest> pullRequestsForBranch = select(getOpenedPullRequests(),
+				having(on(PullRequest.class).getHead().getName(), equalTo(featureBranch.getName())));
+		return pullRequestsForBranch.isEmpty();
 	}
 
 	protected final Collection<PullRequest> getOpenedPullRequests() {

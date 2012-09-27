@@ -5,7 +5,8 @@ import java.util.Collection;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import static com.sfeir.githubTrello.wrapper.Json.*;
+import com.sfeir.githubTrello.wrapper.Json;
+
 import static java.util.Collections.*;
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -25,9 +26,6 @@ public class List {
 	}
 
 	public Collection<Card> getCards() {
-		if (cards.isEmpty() && isNotEmpty(cardsInJson)) {
-			cards = fromJsonToObjects(cardsInJson, Card.class);
-		}
 		return cards;
 	}
 
@@ -36,14 +34,7 @@ public class List {
 	}
 
 	public List withNewCardsInJson(String newCardsInJson) {
-		List newList = clone();
-		newList.cardsInJson = newCardsInJson;
-		return newList;
-	}
-
-	@Override
-	protected List clone() {
-		return listBuilder().id(id).name(name).boardId(boardId).cardsInJson(cardsInJson).build();
+		return listBuilder().id(id).name(name).boardId(boardId).cardsInJson(newCardsInJson).build();
 	}
 
 	public static Builder listBuilder() {
@@ -74,10 +65,13 @@ public class List {
 
 		public List build() {
 			List list = new List();
-			list.cardsInJson = cardsInJson;
 			list.id = id;
 			list.name = name;
 			list.boardId = boardId;
+			list.cardsInJson = cardsInJson;
+			if (isNotEmpty(cardsInJson)) {
+				list.cards = Json.fromJsonToObjects(cardsInJson, Card.class);
+			}
 			return list;
 		}
 

@@ -76,17 +76,43 @@
 					<target>1.7</target>
 					<showDeprecation>true</showDeprecation>
 					<showWarnings>true</showWarnings>
-					<executable>${env.JAVA_7_HOME}/bin/javac</executable>
 					<fork>true</fork>
 				</configuration>
 			</plugin>
 			<plugin>
+		    	<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.12.2</version>
+				<version>2.12.3</version>
 				<configuration>
-					<jvm>${env.JAVA_7_HOME}/bin/java</jvm>
+					<excludedGroups>com.sfeir.githubTrello.ApiTests</excludedGroups>
 				</configuration>
 			</plugin>
+			<plugin>
+		    	<groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-failsafe-plugin</artifactId>
+		        <version>2.12.3</version>
+				<configuration>
+					<includes>
+						<include>**/*ServiceTest.java</include>
+					</includes>
+				</configuration>
+		        <executions>
+		        	<execution>
+		        		<id>integration-testing</id>
+		        		<phase>integration-test</phase>
+		        		<goals>
+							<goal>integration-test</goal>
+		            	</goals>
+		          	</execution>
+		        	<execution>
+		        		<id>verification</id>
+		        		<phase>verify</phase>
+		        		<goals>
+		              		<goal>verify</goal>
+		            	</goals>
+		          	</execution>
+		        </executions>
+		    </plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
@@ -105,12 +131,6 @@
           			</execution>
        			</executions>
         		<configuration>
-					<configurationDirectory>conf</configurationDirectory>
-					<copyConfigurationDirectory>true</copyConfigurationDirectory>
-					<includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
-        			<commandLineArguments>
-                		<commandLineArgument>github-trello-sample.properties</commandLineArgument>
-					</commandLineArguments>
           			<programs>
             			<program>
               				<mainClass>com.sfeir.githubTrello.Main</mainClass>

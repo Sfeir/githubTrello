@@ -2,12 +2,14 @@ package com.sfeir.githubTrello.service;
 
 import java.util.Collection;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.sfeir.githubTrello.domain.trello.Board;
 import com.sfeir.githubTrello.domain.trello.Card;
 import com.sfeir.githubTrello.domain.trello.List;
 import com.sfeir.githubTrello.wrapper.RestClient;
 
-import static com.sfeir.githubTrello.domain.trello.Card.*;
 import static com.sfeir.githubTrello.domain.trello.List.*;
 import static com.sfeir.githubTrello.wrapper.Json.*;
 import static java.lang.String.*;
@@ -30,12 +32,12 @@ public class TrelloService {
 				return list.withNewCardsInJson(getCardsFromList(list));
 			}
 		}
+		logger.warn("Trello list '" + listName + "' not found");
 		return listBuilder().build();
 	}
 
-	public final Card updateCardDescription(Card card, String newDescription) {
-		return cardBuilder().build();
-	}
+	//		public final Card updateCardDescription(Card card, String newDescription) {
+	//		}
 
 	private Collection<List> getListsFromBoard(Board board) {
 		return fromJsonToObjects(
@@ -51,5 +53,6 @@ public class TrelloService {
 
 	private static final String API_URL = "https://api.trello.com/1";
 	private static final String API_KEY = "d0e4aa36488c2e5957da7c3a61a76ff2";
+	private static final Log logger = LogFactory.getLog(TrelloService.class);
 
 }
