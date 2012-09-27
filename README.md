@@ -18,9 +18,10 @@ Applications tokens for both Trello and Github are will need to be saved in a pr
 
 **Github**: Login and go [there](https://github.com/login/oauth/authorize?client_id=2ac660ad9717d1db29b7&scope=repo) to accept GithubTrello into your repository.<br/>
 And then, store the `token` field you'll get from the following as `github.token`:
-	curl -u $githubUsername https://api.github.com/authorizations
 
-Example for the remaining properties (as in src/main/config/github-trello.properties):
+	curl -u $githubUsername https://api.github.com/authorizations
+<br/>
+Example for the remaining properties (as found in src/main/config/github-trello.properties):
 
 	trello.token=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	trello.board-id=xxxxxxxxxxxxxxxxxxxxxxxx
