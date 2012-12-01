@@ -20,6 +20,7 @@ import static com.google.common.collect.Lists.*;
 
 import static com.sfeir.githubTrello.domain.github.Repository.*;
 import static com.sfeir.githubTrello.wrapper.Json.*;
+import static java.util.Arrays.*;
 import static org.fest.assertions.Assertions.*;
 
 @Category(ApiTests.class)
@@ -77,7 +78,8 @@ public class GithubServiceTest {
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		for (Branch branch : service.getAllBranches()) {
-			service.deleteBranch(branch);
+			if (!asList(MASTER_BRANCH, DEVELOP_BRANCH).contains(branch.getName()))
+				service.deleteBranch(branch);
 		}
 		for (PullRequest pullRequest : service.getOpenedPullRequests()) {
 			service.closePullRequest(pullRequest);
