@@ -43,6 +43,3 @@ Java 7 is required, clone the repo and:
 
 And launch the following at repeated intervals:
 	./target/appassembler/bin/github-trello $pathToPropertiesFile
-
-
-Warning: If you want to run a build above `mvn package`, append `-DskipTests` or an equivalent, because running the integration tests will make the build fail. Those tests create and delete branches via the Github API on a given repo, which becomes unavailable afterwards, this bug has been notified to Github ([Example here](https://github.com/GithubTrello/test)).
